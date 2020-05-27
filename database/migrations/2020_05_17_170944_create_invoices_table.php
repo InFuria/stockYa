@@ -20,8 +20,8 @@ class CreateInvoicesTable extends Migration
 
         Schema::create('invoices', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedInteger('payment_method');
-            $table->foreign('payment_method')->references('id')->on('payment_methods')->onDelete('cascade');
+            $table->unsignedInteger('payment_id');
+            $table->foreign('payment_id')->references('id')->on('payment_methods')->onDelete('cascade');
             $table->unsignedBigInteger('client_id');
             $table->foreign('client_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
