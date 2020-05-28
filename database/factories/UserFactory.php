@@ -16,13 +16,16 @@ use Illuminate\Support\Str;
 | model instances for testing / seeding your application's database.
 |
 */
-
+//'dni', 'username', 'name', 'address', 'phone', 'status', 'email', 'password'
 $factory->define(User::class, function (Faker $faker) {
     return [
+        'dni' => $faker->numberBetween(1000000, 999999),
+        'username' => $faker->userName,
         'name' => $faker->name,
+        'address' => $faker->address,
+        'phone' => $faker->phoneNumber,
+        'status' => $faker->boolean,
         'email' => $faker->unique()->safeEmail,
-        'email_verified_at' => now(),
         'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
-        'remember_token' => Str::random(10),
     ];
 });

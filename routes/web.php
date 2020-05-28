@@ -13,13 +13,7 @@
 
 Auth::routes();
 
-
 Route::get('/', function () {
     return view('welcome');
 });
 Route::get('/home', 'HomeController@index')->name('home');
-
-
-/** General Manage System Routes **/
-Route::resource('users', 'UserController');
-Route::post('users/{user}/ban', 'UserController@ban')->name('users.ban');
