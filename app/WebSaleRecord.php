@@ -4,9 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class WebTransactions extends Model
+class WebSaleRecord extends Model
 {
-    protected $table = 'web_transactions';
+    protected $table = 'web_sale_records';
 
     protected $fillable = ['transaction_id', 'user_id', 'status'];
 }

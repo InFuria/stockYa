@@ -13,9 +13,6 @@ class UserController extends Controller
     public function all()
     {
         try {
-            /*if ($input = request('name')->input()){
-                dd($input);
-            }*/
 
             $users = User::all();
 
@@ -27,20 +24,14 @@ class UserController extends Controller
         }
     }
 
-    public function create()
-    {
-        try {
-
-        } catch (\Exception $e){
-            Log::error('UserController:: - ' . $e->getMessage());
-            return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);
-        }
-    }
-
     public function store(UserRequest $request)
     {
         try {
+            $user = User::create($request->all());
 
+            return response()->json([
+                'message' => 'Se ha creado al usuario! Solicite el token de acceso.'
+            ]);
         } catch (\Exception $e){
             Log::error('UserController:: - ' . $e->getMessage());
             return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);

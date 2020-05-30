@@ -11,7 +11,8 @@ use App\ProductCategory;
 use App\User;
 use App\WebSale;
 use App\WebSaleDetail;
-use App\WebTransactions;
+use App\WebSaleRecord;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -29,16 +30,16 @@ class ProductController extends Controller
 
         factory(WebSale::class, 20)->create();
         factory(WebSaleDetail::class, 15)->create();
-        factory(WebTransactions::class, 15)->create();
+        factory(WebSaleRecord::class, 15)->create();
     }
 
     public function getProducts()
     {
         try {
-            if (!empty(request()->get('company_id'))){
+            if ($request = request()->get('company_id')) {
 
-                $products = Product::where('company_id', request()->where('status', 1)->get('company_id'))->get()->toArray();
-                $company = Company::where('id', request()->get('company_id'))->where('status', 1)->first();
+                $products = Product::where('company_id', $request)->where('status', 1)->paginate(15);
+                $company = Company::where('id', $request)->first();
 
                 return response()->json([
                     'products' => $products,
@@ -46,7 +47,7 @@ class ProductController extends Controller
                 ]);
             }
 
-            $products = Product::with('company')->get();
+            $products = Product::with('company')->paginate(15);
 
             return response()->json($products);
 
@@ -61,15 +62,30 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
 
-            $request = array_map('trim', $request->all());
+            $product = Product::create([
+                'slug' => $request->slug,
+                'name' => $request->name,
+                'description' => $request->description,
+                'type' => $request->type,
+                'image' => $request->image,
+                'price' => $request->price,
+                'category_id' => $request->category_id,
+                'company_id' => $request->company_detail['id'],
+                'score' => 0,
+                'score_count' => 0,
+                'status' => 1
+            ]);
 
-            $product = Product::create($request->except(['_token', '_method']));
             DB::commit();
 
             return response()->json([
-                'error' => false,
-                'message' => "The product has been created."], 201);
+                'message' => 'El producto ha sido creado',
+                'product' => $product], 201);
 
+        } catch (QueryException $qe){
+            DB::rollBack();
+            Log::error('ProductController::store - ' . $qe->getMessage());
+            return response('Ha ocurrido un error al procesar la consulta', 400)->json(['message' => $qe->getMessage()]);
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('ProductController::store - ' . $e->getMessage());
@@ -102,13 +118,19 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
 
-            $request = array_map('trim', $request->all());
-
-            $product->update($request->except(['_token', '_method']));
+            $product->update($request->all());
+            $product->company()->associate($request->company_detail['id']);
+            $product->save();
             DB::commit();
 
-            return response('El producto se ha actualizado!', 200);
+            return response([
+                'message' => 'El producto se ha actualizado!',
+                'product' => $product], 200);
 
+        } catch (QueryException $qe){
+            DB::rollBack();
+            Log::error('ProductController::update - ' . $qe->getMessage());
+            return response('Ha ocurrido un error al procesar la consulta', 400)->json(['message' => $qe->getMessage()]);
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('ProductController::update - ' . $e->getMessage());
@@ -126,6 +148,10 @@ class ProductController extends Controller
 
             return response('El producto ha sido eliminado', 200);
 
+        } catch (QueryException $qe){
+            DB::rollBack();
+            Log::error('ProductController::destroy - ' . $qe->getMessage());
+            return response('Ha ocurrido un error al procesar la consulta', 400)->json(['message' => $qe->getMessage()]);
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('ProductController::destroy - ' . $e->getMessage());
@@ -164,6 +190,10 @@ class ProductController extends Controller
                 'product' => $product
                 ], 200);
 
+        } catch (QueryException $qe){
+            DB::rollBack();
+            Log::error('ProductController::setScore - ' . $qe->getMessage());
+            return response('Ha ocurrido un error al procesar la consulta', 400)->json(['message' => $qe->getMessage()]);
         } catch (\Exception $e){
             DB::rollBack();
             Log::error('ProductController::setScore - ' . $e->getMessage());
