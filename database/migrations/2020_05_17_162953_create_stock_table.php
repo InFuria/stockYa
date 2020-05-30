@@ -30,7 +30,7 @@ class CreateStockTable extends Migration
             $table->timestamps();
         });
 
-        Schema::create('stock_history', function (Blueprint $table) {
+        Schema::create('stock_records', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('stock_id');
             $table->foreign('stock_id')->references('id')->on('stock')->onDelete('cascade');
@@ -73,7 +73,7 @@ class CreateStockTable extends Migration
     {
         Schema::dropIfExists('stock_audit_detail');
         Schema::dropIfExists('stock_audit');
-        Schema::dropIfExists('stock_history');
+        Schema::dropIfExists('stock_records');
         Schema::dropIfExists('stock');
         Schema::dropIfExists('units');
     }
