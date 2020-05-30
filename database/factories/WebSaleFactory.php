@@ -10,6 +10,8 @@ $factory->define(WebSale::class, function (Faker $faker) {
         'branch_id' => $faker->numberBetween(1,50),
         'client_id' => $faker->numberBetween(1,50),
         'payment_id' => 1,
-        'status' => $faker->boolean
+        'status' => $faker->boolean,
+        'total' => $faker->randomNumber(),
+        'tracker' => $faker->randomNumber()
     ];
 });

@@ -9,21 +9,21 @@ use Illuminate\Support\Facades\Log;
 
 class CompanyController extends Controller
 {
+    /** TESTED */
     public function getCompanies(){
         try {
 
             if ($status = request()->get('status')){
 
-                $companies = Company::where('status', $status)->get();
+                $companies = Company::where('status', $status)->paginate(15);
             }
 
             if ($category_id = request()->get('category_id')){
 
-                $companies = Company::where('category_id', $category_id)->where('status', 1)->get()->toArray();
+                $companies = Company::where('category_id', $category_id)->where('status', 1)->paginate(15);
             }
 
-            if (! request()->input())
-                $companies = Company::where('status', 1)->get()->toArray();
+            $companies = isset($companies) ? $companies : Company::where('status', 1)->paginate(15);
 
             return response()->json($companies, 200);
 
@@ -33,10 +33,11 @@ class CompanyController extends Controller
         }
     }
 
+    /** TESTED */
     public function listCategories(){
         try {
 
-            $categories = DB::table('company_categories')->get();
+            $categories = DB::table('company_categories')->paginate(15);
 
             return response()->json($categories, 200);
 

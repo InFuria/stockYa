@@ -51,7 +51,7 @@ class CreateProductsTable extends Migration
             $table->boolean('status');
         });
 
-        Schema::create('calification_history', function (Blueprint $table) {
+        Schema::create('calification_records', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
@@ -68,7 +68,7 @@ class CreateProductsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('calification_history');
+        Schema::dropIfExists('calification_records');
         Schema::dropIfExists('products_tags');
         Schema::dropIfExists('products');
         Schema::dropIfExists('tags');
