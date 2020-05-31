@@ -1,5 +1,6 @@
 <?php
 
+use App\Helpers;
 use Illuminate\Http\Request;
 
 /*
@@ -27,7 +28,15 @@ Route::middleware(['api'])->group(function () {
     Route::delete('products/{product}', 'Api\ProductController@destroy')->name('products.destroy');
     Route::post('products/{product}/status', 'Api\ProductController@status')->name('products.status');
     Route::post('products/{product}/setScore', 'Api\ProductController@setScore')->name('products.setScore');
+    Route::post('products/{product}/setTags', 'Api\ProductController@setTags')->name('products.setTags');
 
+
+    /** USER ROUTES */
+    Route::post('users','Api\UserController@store')->name('users.store');
+    Route::put('users/{user}','Api\UserController@update')->name('users.update');
+    Route::patch('users/{user}','Api\UserController@update')->name('users.update');
+    Route::delete('users/{user}','Api\UserController@destroy')->name('users.destroy');
+    Route::post('users/{user}/ban','Api\UserController@ban')->name('users.ban');
 
     /** COMPANIES ROUTES **/
     Route::get('companies', 'Api\CompanyController@getCompanies')->name('companies.getCompanies');
@@ -46,9 +55,8 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('login', 'AuthController@login');
     Route::post('signup', 'AuthController@signup');
 
-    Route::get('logout', 'AuthController@logout');
-    Route::get('user', 'AuthController@user');
+    Route::group(['middleware' => 'auth:api'], function() {
+        Route::get('logout', 'AuthController@logout');
+        Route::get('user', 'AuthController@user');
+    });
 });
-
-
-

@@ -31,14 +31,37 @@ class ProductController extends Controller
         factory(WebSale::class, 20)->create();
         factory(WebSaleDetail::class, 15)->create();
         factory(WebSaleRecord::class, 15)->create();
+
+        $user = new User();
+        $user->dni = 12345678;
+        $user->username = 'mango';
+        $user->name = 'Mango';
+        $user->address = '00000';
+        $user->phone = '00000';
+        $user->status = 1;
+        $user->email = 'admin@gmail.com';
+        $user->password = 'undertale';
+        $user->save();
+
+        $user->createToken('Admin token');
     }
 
     public function getProducts()
     {
         try {
+
             if ($request = request()->get('company_id')) {
 
-                $products = Product::where('company_id', $request)->where('status', 1)->paginate(15);
+                $products = Product::where('company_id', $request);
+
+                if (is_integer($status = request()->get('status'))) {
+
+                    $products->where('status', request()->status)->with('tags')->get();
+                } else{
+
+                    $products->with('tags')->get();
+                }
+
                 $company = Company::where('id', $request)->first();
 
                 return response()->json([
@@ -47,13 +70,38 @@ class ProductController extends Controller
                 ]);
             }
 
-            $products = Product::with('company')->paginate(15);
+            if ($request = request()->get('tag_id')) {
+
+                $products = Product::with('company')
+                    ->join('product_tag', 'product_tag.product_id', '=', 'products.id')
+                    ->where('product_tag.product_id', request()->tag_id);
+
+                if (is_integer($status = request()->get('status'))) {
+
+                    $products->where('status', request()->status)->get();
+                } else {
+
+                    $products->get();
+                }
+
+                return response()->json([
+                    'products' => $products
+                ]);
+            }
+
+            if (is_integer($status = request()->get('status'))) {
+
+                $products = Product::where('status', (Integer) request()->status)->with('company', 'tags')->paginate(15);
+            } else {
+
+                $products = Product::with('company', 'tags')->paginate(15);
+            }
 
             return response()->json($products);
 
         } catch (\Exception $e) {
             Log::error('ProductController::getProducts - ' . $e->getMessage());
-            return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);
+            return response()->json(['origin' => 'ProductController::getProducts', 'message' => $e->getMessage()], 400);
         }
     }
 
@@ -76,26 +124,34 @@ class ProductController extends Controller
                 'status' => 1
             ]);
 
+            if (request()->get('tags'))
+                $product->tags()->attach(request()->tags);
+
             DB::commit();
 
             return response()->json([
                 'message' => 'El producto ha sido creado',
-                'product' => $product], 201);
+                'product' => $product->tags], 201);
 
         } catch (QueryException $qe){
             DB::rollBack();
             Log::error('ProductController::store - ' . $qe->getMessage());
-            return response('Ha ocurrido un error al procesar la consulta', 400)->json(['message' => $qe->getMessage()]);
+            return response()->json(['origin' => 'ProductController::store', 'message' => $qe->getMessage()], 400);
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('ProductController::store - ' . $e->getMessage());
-            return response()->json(['error' => true, 'message' => $e->getMessage()], 404);
+            return response()->json(['origin' => 'ProductController::store', 'message' => $e->getMessage()], 400);
         }
     }
 
     public function select(Product $product)
     {
         try {
+
+            $product->sold = 0;
+            $sale = WebSaleDetail::where('product_id', $product->id)->first();
+
+            if ($sale != null)
             $product->sold = WebSaleDetail::selectRaw("sum(quantity) as quantity")
                 ->join('web_sales', 'web_sales.id', '=', 'web_sale_detail.web_sale_id')
                 ->where('web_sales.status', 1)
@@ -104,37 +160,56 @@ class ProductController extends Controller
                 ->first()->quantity;
 
             $product->company_detail = $product->company;
+            $product->tags = $product->tags;
 
             return response()->json($product->attributesToArray());
 
         } catch (\Exception $e) {
             Log::error('ProductController::select - ' . $e->getMessage());
-            return response('Ha ocurrido un error al buscar el producto seleccionado.', 400)->json(['message' => $e->getMessage()]);
+            return response()->json(['origin' => 'ProductController::select', 'message' => $e->getMessage()], 400);
         }
     }
 
-    public function update(ProductRequest $request, Product $product)
+    public function update(Product $product)
     {
         DB::beginTransaction();
         try {
 
-            $product->update($request->all());
-            $product->company()->associate($request->company_detail['id']);
+            $request = request()->validate([
+                'slug' => 'string',
+                'name' => 'string',
+                'description' => 'string',
+                'type' => 'string',
+                'image' => 'string',
+                'price' => 'numeric',
+                'category_id' => 'integer',
+                'company_id' => 'integer',
+                'status' => 'integer'
+            ]);
+
+            $product->update($request);
+
+            if (request()->get('company_id'))
+                $product->company()->associate(request()->company_id);
+
+            if (request()->get('tags'))
+                $product->tags()->sync(request()->tags);
+
             $product->save();
             DB::commit();
 
-            return response([
+            return response()->json([
                 'message' => 'El producto se ha actualizado!',
-                'product' => $product], 200);
+                'product' => $product->with('company', 'tags')->first()], 200);
 
         } catch (QueryException $qe){
             DB::rollBack();
             Log::error('ProductController::update - ' . $qe->getMessage());
-            return response('Ha ocurrido un error al procesar la consulta', 400)->json(['message' => $qe->getMessage()]);
+            return response()->json(['origin' => 'ProductController::update', 'message' => $qe->getMessage()], 400);
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('ProductController::update - ' . $e->getMessage());
-            return response('Ha ocurrido un error al actualizar el producto', 400)->json(['message' => $e->getMessage()]);
+            return response()->json(['origin' => 'ProductController::update', 'message' => $e->getMessage()], 400);
         }
     }
 
@@ -144,6 +219,7 @@ class ProductController extends Controller
         try {
 
             $product->delete();
+            $product->tags()->sync([]);
             DB::commit();
 
             return response('El producto ha sido eliminado', 200);
@@ -151,11 +227,11 @@ class ProductController extends Controller
         } catch (QueryException $qe){
             DB::rollBack();
             Log::error('ProductController::destroy - ' . $qe->getMessage());
-            return response('Ha ocurrido un error al procesar la consulta', 400)->json(['message' => $qe->getMessage()]);
+            return response()->json(['origin' => 'ProductController::destroy', 'message' => $qe->getMessage()], 400);
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('ProductController::destroy - ' . $e->getMessage());
-            return response('Ha ocurrido un error al eliminar un producto', 400)->json(['message' => $e->getMessage()]);
+            return response()->json(['origin' => 'ProductController::destroy', 'message' => $e->getMessage()], 400);
         }
     }
 
@@ -172,7 +248,7 @@ class ProductController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('ProductController::status - ' . $e->getMessage());
-            return response('Ha ocurrido un error al modificar el estado del producto', 400)->json(['message' => $e->getMessage()]);
+            return response()->json(['origin' => 'ProductController::status', 'message' => $e->getMessage()], 400);
         }
     }
 
@@ -193,11 +269,40 @@ class ProductController extends Controller
         } catch (QueryException $qe){
             DB::rollBack();
             Log::error('ProductController::setScore - ' . $qe->getMessage());
-            return response('Ha ocurrido un error al procesar la consulta', 400)->json(['message' => $qe->getMessage()]);
+            return response()->json(['origin' => 'ProductController::setScore', 'message' => $qe->getMessage()], 400);
         } catch (\Exception $e){
             DB::rollBack();
             Log::error('ProductController::setScore - ' . $e->getMessage());
-            return response('Ha ocurrido un error al procesar la peticion', 400)->json(['message' => $e->getMessage()]);
+            return response()->json(['origin' => 'ProductController::setScore', 'message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function setTags(Product $product){
+        DB::beginTransaction();
+        try {
+
+            $product->tags()->sync(request()->get('tags'));
+            DB::commit();
+
+            $tags = array_map(function($e) {
+                unset($e['pivot']);
+                return $e;
+            }, $product->tags->toArray());
+
+            return response()->json([
+                'message' => 'Etiquetas actualizadas!',
+                'product' => $product->id,
+                'tags' => $tags
+            ], 200);
+
+        } catch (QueryException $qe){
+            DB::rollBack();
+            Log::error('ProductController::setTags - ' . $qe->getMessage());
+            return response()->json(['origin' => 'ProductController::setTags', 'message' => $qe->getMessage()], 400);
+        } catch (\Exception $e){
+            DB::rollBack();
+            Log::error('ProductController::setTags - ' . $e->getMessage());
+            return response()->json(['origin' => 'ProductController::setTags', 'message' => $e->getMessage()], 400);
         }
     }
 }

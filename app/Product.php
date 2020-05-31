@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model
 {
@@ -12,5 +13,9 @@ class Product extends Model
 
     public function company(){
         return $this->belongsTo(Company::class, 'company_id');
+    }
+
+    public function tags(){
+        return $this->belongsToMany(Tag::class, 'product_tag', 'product_id', 'tag_id');
     }
 }
