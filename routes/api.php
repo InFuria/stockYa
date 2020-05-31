@@ -32,11 +32,11 @@ Route::middleware(['api'])->group(function () {
 
 
     /** USER ROUTES */
-    Route::post('users','Api\UserController@store')->name('users.store');
-    Route::put('users/{user}','Api\UserController@update')->name('users.update');
-    Route::patch('users/{user}','Api\UserController@update')->name('users.update');
-    Route::delete('users/{user}','Api\UserController@destroy')->name('users.destroy');
-    Route::post('users/{user}/ban','Api\UserController@ban')->name('users.ban');
+    Route::post('users','Api\UserController@store');
+    Route::put('users/{user}','Api\UserController@update');
+    Route::patch('users/{user}','Api\UserController@update');
+    Route::delete('users/{user}','Api\UserController@destroy');
+    Route::post('users/{user}/ban','Api\UserController@ban');
 
     /** COMPANIES ROUTES **/
     Route::get('companies', 'Api\CompanyController@getCompanies')->name('companies.getCompanies');
@@ -48,6 +48,10 @@ Route::middleware(['api'])->group(function () {
     Route::post('websales/register','Api\WebSaleController@register')->name('websales.register');
     Route::get('websales/{order}','Api\WebSaleController@selectOrder')->name('websales.selectOrder');
     Route::post('websales/{order}/status','Api\WebSaleController@changeStatus')->name('websales.changeStatus');
+
+    /** FILES */
+    Route::get('files{file}', 'Api\FileController@getFile');
+    Route::post('files', 'Api\FileController@store');
 });
 
 /** PASSPORT **/

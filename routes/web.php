@@ -16,3 +16,7 @@ Auth::routes();
 Route::get('/', function (){
     return view('main.index');
 });
+
+Route::get('/frontend', function (){
+    return view('frontend');
+});
