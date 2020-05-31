@@ -21,7 +21,8 @@ class CreateProductsTable extends Migration
         Schema::create('tags', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->integer('type');
+            $table->integer('type')->nullable();
+            $table->boolean('status')->default(1);
         });
 
         Schema::create('products', function (Blueprint $table) {
@@ -42,13 +43,12 @@ class CreateProductsTable extends Migration
             $table->timestamps();
         });
 
-        Schema::create('product_tags', function (Blueprint $table) {
+        Schema::create('product_tag', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedBigInteger('product_id');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-            $table->unsignedBigInteger('tag_id');
+            $table->unsignedInteger('tag_id');
             $table->foreign('tag_id')->references('id')->on('tags')->onDelete('cascade');
-            $table->boolean('status');
         });
 
         Schema::create('calification_records', function (Blueprint $table) {
