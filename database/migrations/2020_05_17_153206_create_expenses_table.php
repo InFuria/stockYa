@@ -26,8 +26,8 @@ class CreateExpensesTable extends Migration
             $table->double('cost', 10, 2);
             $table->unsignedInteger('expenses_category');
             $table->foreign('expenses_category')->references('id')->on('expenses_categories')->onDelete('cascade');
-            $table->unsignedInteger('branch_id');
-            $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
+            $table->unsignedInteger('company_id');
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->timestamps();
         });
     }

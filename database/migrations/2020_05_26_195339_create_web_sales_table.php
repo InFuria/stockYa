@@ -15,8 +15,8 @@ class CreateWebSalesTable extends Migration
     {
         Schema::create('web_sales', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedInteger('branch_id');
-            $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
+            $table->unsignedInteger('company_id');
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->unsignedBigInteger('client_id');
             $table->foreign('client_id')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedInteger('payment_id');
@@ -24,6 +24,8 @@ class CreateWebSalesTable extends Migration
             $table->integer('status')->default(0);
             $table->double('total', 10,2);
             $table->integer('tracker');
+            $table->string('tags');
+            $table->string('text');
             $table->timestamps();
         });
 

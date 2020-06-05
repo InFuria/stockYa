@@ -17,7 +17,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'dni', 'username', 'name', 'address', 'phone', 'status', 'email', 'password'
+        'dni', 'token', 'username', 'name', 'address', 'phone', 'status', 'email', 'password'
     ];
 
     /**
@@ -37,6 +37,11 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function findForPassport($username)
+    {
+        return $this->where('username', $username)->first();
+    }
 
     public function websales(){
         return $this->hasMany(WebSale::class, 'client_id');

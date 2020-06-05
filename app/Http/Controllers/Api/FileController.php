@@ -8,8 +8,6 @@ use App\File;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Contracts\Routing\ResponseFactory;
-use Illuminate\Http\Request;
 
 class FileController extends Controller
 {
@@ -43,9 +41,20 @@ class FileController extends Controller
         }
     }
 
+    public function apply(){
+        try{
+
+            //
+
+        } catch (\Exception $e){
+            Log::error('FileController::apply - ' . $e->getMessage());
+            return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);
+        }
+    }
+
     static public function storeDB($name)
     {
-        var_dump($name);
+        //var_dump($name);
         DB::beginTransaction();
         try {
             $img = File::create([

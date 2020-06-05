@@ -22,8 +22,8 @@ class CreateStockTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('product_id');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-            $table->unsignedInteger('branch_id');
-            $table->foreign('branch_id')->references('id')->on('branches')->onDelete('cascade');
+            $table->unsignedInteger('company_id');
+            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
             $table->double('quantity',15,5);
             $table->unsignedInteger('unit_id');
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');

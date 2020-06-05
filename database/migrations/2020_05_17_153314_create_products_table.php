@@ -31,7 +31,6 @@ class CreateProductsTable extends Migration
             $table->string('name');
             $table->string('description');
             $table->string('type');
-            $table->string('image');
             $table->double('price',10,2);
             $table->unsignedInteger('category_id');
             $table->foreign('category_id')->references('id')->on('products_categories')->onDelete('cascade');
@@ -40,6 +39,7 @@ class CreateProductsTable extends Migration
             $table->double('score', 3,2);
             $table->integer('score_count');
             $table->boolean('status');
+            $table->integer('visits')->nullable();
             $table->timestamps();
         });
 
