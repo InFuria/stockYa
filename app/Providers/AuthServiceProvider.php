@@ -2,9 +2,12 @@
 
 namespace App\Providers;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Passport\Passport;
+use App\User;
+use App\Policies\UserPolicy;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -15,6 +18,7 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // 'App\Model' => 'App\Policies\ModelPolicy',
+        User::class => UserPolicy::class,
     ];
 
     /**
@@ -26,6 +30,18 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
         Passport::routes();
-        //
+        Passport::tokensExpireIn(Carbon::now()->setTimezone('America/Asuncion')->addMinutes(30));
+        //Passport::refreshTokensExpireIn(now()->addDays(30));
+        Passport::personalAccessTokensExpireIn(Carbon::now()->setTimezone('America/Asuncion')->addHours(24));
+
+        Passport::tokensCan([
+            'place-orders' => 'Place orders',
+            'check-status' => 'Check order status',
+        ]);
+
+        Passport::setDefaultScope([
+            'check-status',
+            'place_orders',
+        ]);
     }
 }

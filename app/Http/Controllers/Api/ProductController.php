@@ -2,48 +2,75 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Branch;
 use App\Company;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Product;
 use App\ProductCategory;
+use App\Stock;
 use App\User;
 use App\WebSale;
 use App\WebSaleDetail;
 use App\WebSaleRecord;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use phpDocumentor\Reflection\File;
 
 class ProductController extends Controller
 {
 
-    public function index(){
+    public function index()
+    {
+
+        /*$cities = \DB::table('cities')->insert(
+            ['name' => 'Goya']
+        );
+
+        $pay = \DB::table('payment_methods')->insert(
+            ['name' => 'efectivo']
+        );
+
+        $units = \DB::table('units')->insert(
+            ['name' => 'gr']
+        );
+
+        $user = new User();
+        $user->dni = 12345678;
+        $user->username = 'ely.admin';
+        $user->name = 'Eliana Gimenez';
+        $user->address = '00000';
+        $user->phone = '00000';
+        $user->status = 1;
+        $user->email = 'eli_gimenez@outlook.com';
+        $user->password = Hash::make('undertale');
+        $user->save();
+
+        $user->createToken('Personal Admin Token', ['*'])->accessToken;
+
+        $user = new User();
+        $user->dni = 123456789;
+        $user->username = 'dany.admin';
+        $user->name = 'Daniel Garcia';
+        $user->address = '00000';
+        $user->phone = '00000';
+        $user->status = 1;
+        $user->email = 'learfen001@gmail.com ';
+        $user->password = Hash::make('undertale');
+        $user->save();
+
+        $user->createToken('Personal Admin Token', ['*'])->accessToken;*/
 
         factory(User::class, 50)->create();
 
         factory(Company::class, 50)->create();
         factory(ProductCategory::class, 50)->create();
         factory(Product::class, 50)->create();
-        factory(Branch::class, 50)->create();
 
         factory(WebSale::class, 20)->create();
         factory(WebSaleDetail::class, 15)->create();
         factory(WebSaleRecord::class, 15)->create();
-
-        $user = new User();
-        $user->dni = 12345678;
-        $user->username = 'mango';
-        $user->name = 'Mango';
-        $user->address = '00000';
-        $user->phone = '00000';
-        $user->status = 1;
-        $user->email = 'admin@gmail.com';
-        $user->password = 'undertale';
-        $user->save();
-
-        $user->createToken('Admin token');
     }
 
     public function getProducts()
@@ -52,36 +79,38 @@ class ProductController extends Controller
 
             if ($request = request()->get('company_id')) {
 
-                $products = Product::where('company_id', $request);
+                $products = Product::with('stock', 'image:files.id,files.name')
+                ->where('company_id', $request);
 
                 if (is_integer($status = request()->get('status'))) {
 
-                    $products->where('status', request()->status)->with('tags')->get();
-                } else{
+                    $products = $products->where('status', request()->status)->get();
+                } else {
 
-                    $products->with('tags')->get();
+                    $products = $products->get();
                 }
 
-                $company = Company::where('id', $request)->first();
+                $company = Company::with('image:files.id,files.name')->where('id', $request)->first();
 
                 return response()->json([
-                    'products' => $products,
-                    'company' => $company
+                    'company' => $company,
+                    'products' => $products
                 ]);
             }
 
             if ($request = request()->get('tag_id')) {
 
-                $products = Product::with('company')
+                $products = Product::with('company', 'image:files.id,files.name')
                     ->join('product_tag', 'product_tag.product_id', '=', 'products.id')
-                    ->where('product_tag.product_id', request()->tag_id);
+                    ->where('product_tag.tag_id', request()->tag_id);
+
 
                 if (is_integer($status = request()->get('status'))) {
 
-                    $products->where('status', request()->status)->get();
+                    $products = $products->where('status', request()->status)->get()->toArray();
                 } else {
 
-                    $products->get();
+                    $products = $products->get()->toArray();
                 }
 
                 return response()->json([
@@ -91,10 +120,11 @@ class ProductController extends Controller
 
             if (is_integer($status = request()->get('status'))) {
 
-                $products = Product::where('status', (Integer) request()->status)->with('company', 'tags')->paginate(15);
+                $products = Product::where('status', (integer)request()->status)->with('company', 'tags', 'image:files.id,files.name')
+                    ->paginate(15);
             } else {
 
-                $products = Product::with('company', 'tags')->paginate(15);
+                $products = Product::with('company', 'tags', 'image:files.id,files.name')->paginate(15);
             }
 
             return response()->json($products);
@@ -110,30 +140,28 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
 
-            $product = Product::create([
-                'slug' => $request->slug,
-                'name' => $request->name,
-                'description' => $request->description,
-                'type' => $request->type,
-                'image' => $request->image,
-                'price' => $request->price,
-                'category_id' => $request->category_id,
-                'company_id' => $request->company_detail['id'],
-                'score' => 0,
-                'score_count' => 0,
-                'status' => 1
-            ]);
+            $product = Product::create($request->all());
 
             if (request()->get('tags'))
                 $product->tags()->attach(request()->tags);
 
+            if (request()->get('image')){
+                foreach (request()->get('image') as $value){
+                    $data[$value] = ['origin' => 'product'];
+                }
+                $product->files()->sync($data);
+            }
+
             DB::commit();
 
-            return response()->json([
-                'message' => 'El producto ha sido creado',
-                'product' => $product->tags], 201);
+            $product->image = $product->files->map->only('id', 'name');
+            $product->tags = $product->tags;
 
-        } catch (QueryException $qe){
+            return response()->json([
+                'message' => 'El producto ha sido creado con exito!',
+                'product' => $product->attributesToArray()], 201);
+
+        } catch (QueryException $qe) {
             DB::rollBack();
             Log::error('ProductController::store - ' . $qe->getMessage());
             return response()->json(['origin' => 'ProductController::store', 'message' => $qe->getMessage()], 400);
@@ -152,15 +180,17 @@ class ProductController extends Controller
             $sale = WebSaleDetail::where('product_id', $product->id)->first();
 
             if ($sale != null)
-            $product->sold = WebSaleDetail::selectRaw("sum(quantity) as quantity")
-                ->join('web_sales', 'web_sales.id', '=', 'web_sale_detail.web_sale_id')
-                ->where('web_sales.status', 1)
-                ->where('product_id', $product->id)
-                ->groupByRaw("product_id")->orderBy('product_id')
-                ->first()->quantity;
+                $product->sold = WebSaleDetail::selectRaw("sum(quantity) as quantity")
+                    ->join('web_sales', 'web_sales.id', '=', 'web_sale_detail.web_sale_id')
+                    ->where('web_sales.status', 1)
+                    ->where('product_id', $product->id)
+                    ->groupByRaw("product_id")->orderBy('product_id')
+                    ->first()->quantity;
 
             $product->company_detail = $product->company;
             $product->tags = $product->tags;
+            $product->stock = $product->stock['quantity'];
+            $product->files = $product->files->map->only('id', 'name');
 
             return response()->json($product->attributesToArray());
 
@@ -170,39 +200,39 @@ class ProductController extends Controller
         }
     }
 
-    public function update(Product $product)
+    public function update(ProductRequest $request, Product $product)
     {
         DB::beginTransaction();
         try {
 
-            $request = request()->validate([
-                'slug' => 'string',
-                'name' => 'string',
-                'description' => 'string',
-                'type' => 'string',
-                'image' => 'string',
-                'price' => 'numeric',
-                'category_id' => 'integer',
-                'company_id' => 'integer',
-                'status' => 'integer'
-            ]);
-
-            $product->update($request);
+            $product->update($request->all());
 
             if (request()->get('company_id'))
-                $product->company()->associate(request()->company_id);
+                $product->company()->update(['company_id' => request()->company_id]);
 
             if (request()->get('tags'))
                 $product->tags()->sync(request()->tags);
 
+            if (request()->get('image')){
+                foreach (request()->get('image') as $value){
+                    $data[$value] = ['origin' => 'product'];
+                }
+                $product->files()->sync($data);
+            }
+
             $product->save();
             DB::commit();
 
+            $product->company = $product->company;
+            $product->tags = $product->tags;
+            $product->stock = $product->stock["quantity"];
+            $product->image =  $product->files->map->only('id', 'name');
+
             return response()->json([
                 'message' => 'El producto se ha actualizado!',
-                'product' => $product->with('company', 'tags')->first()], 200);
+                'product' => $product->attributesToArray()], 200);
 
-        } catch (QueryException $qe){
+        } catch (QueryException $qe) {
             DB::rollBack();
             Log::error('ProductController::update - ' . $qe->getMessage());
             return response()->json(['origin' => 'ProductController::update', 'message' => $qe->getMessage()], 400);
@@ -220,11 +250,13 @@ class ProductController extends Controller
 
             $product->delete();
             $product->tags()->sync([]);
+            $product->stock()->update([]);
+            $product->files()->sync([]);
             DB::commit();
 
             return response('El producto ha sido eliminado', 200);
 
-        } catch (QueryException $qe){
+        } catch (QueryException $qe) {
             DB::rollBack();
             Log::error('ProductController::destroy - ' . $qe->getMessage());
             return response()->json(['origin' => 'ProductController::destroy', 'message' => $qe->getMessage()], 400);
@@ -235,7 +267,8 @@ class ProductController extends Controller
         }
     }
 
-    public function status(Product $product){
+    public function status(Product $product)
+    {
         DB::beginTransaction();
         try {
 
@@ -252,39 +285,41 @@ class ProductController extends Controller
         }
     }
 
-    public function setScore(Product $product){
+    public function setScore(Product $product)
+    {
         DB::beginTransaction();
         try {
             $old_score = $product->score * $product->score_count;
             $product->score = round(($old_score + request('calification')) / ($product->score_count + 1), 2);
-            $product->score_count ++;
+            $product->score_count++;
             $product->save();
             DB::commit();
 
             return response()->json([
                 'message' => 'Calificacion actualizada!',
                 'product' => $product
-                ], 200);
+            ], 200);
 
-        } catch (QueryException $qe){
+        } catch (QueryException $qe) {
             DB::rollBack();
             Log::error('ProductController::setScore - ' . $qe->getMessage());
             return response()->json(['origin' => 'ProductController::setScore', 'message' => $qe->getMessage()], 400);
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             DB::rollBack();
             Log::error('ProductController::setScore - ' . $e->getMessage());
             return response()->json(['origin' => 'ProductController::setScore', 'message' => $e->getMessage()], 400);
         }
     }
 
-    public function setTags(Product $product){
+    public function setTags(Product $product)
+    {
         DB::beginTransaction();
         try {
 
             $product->tags()->sync(request()->get('tags'));
             DB::commit();
 
-            $tags = array_map(function($e) {
+            $tags = array_map(function ($e) {
                 unset($e['pivot']);
                 return $e;
             }, $product->tags->toArray());
@@ -295,14 +330,16 @@ class ProductController extends Controller
                 'tags' => $tags
             ], 200);
 
-        } catch (QueryException $qe){
+        } catch (QueryException $qe) {
             DB::rollBack();
             Log::error('ProductController::setTags - ' . $qe->getMessage());
             return response()->json(['origin' => 'ProductController::setTags', 'message' => $qe->getMessage()], 400);
-        } catch (\Exception $e){
+        } catch (\Exception $e) {
             DB::rollBack();
             Log::error('ProductController::setTags - ' . $e->getMessage());
             return response()->json(['origin' => 'ProductController::setTags', 'message' => $e->getMessage()], 400);
         }
     }
+
+    public function visits(){}
 }
