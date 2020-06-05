@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBranchesTable extends Migration
+class CreateCompanyTable extends Migration
 {
     /**
      * Run the migrations.
@@ -26,24 +26,22 @@ class CreateBranchesTable extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->string('address')->nullable();
             $table->string('email');
-            $table->double('score', 3, 2);
-            $table->boolean('delivery');
-            $table->integer('status');
-            $table->integer('category_id');
-        });
-
-        Schema::create('branches', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('code');
-            $table->unsignedInteger('city_id');
-            $table->foreign('city_id')->references('id')->on('cities')->onDelete('cascade');
-            $table->unsignedInteger('company_id');
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
-            $table->string('name');
-            $table->string('address');
             $table->string('phone');
-            $table->timestamps();
+            $table->string('whatsapp')->nullable();
+            $table->string('social')->nullable();
+            $table->integer('city_id');
+            $table->foreign('city_id')->references('id')->on('cities')->onDelete('cascade');
+            $table->double('score', 3, 2)->nullable();
+            $table->double('delivery', 5,2)->nullable();
+            $table->string('zone')->nullable();
+            $table->integer('status');
+            $table->string('attention_hours')->nullable();
+            $table->integer('category_id');
+            $table->foreign('category_id')->references('id')->on('company_categories')->onDelete('cascade');
+            $table->integer('company_id')->nullable();
+            $table->integer('visits')->nullable();
         });
     }
 
@@ -54,8 +52,8 @@ class CreateBranchesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('branches');
         Schema::dropIfExists('companies');
+        Schema::dropIfExists('company_categories');
         Schema::dropIfExists('cities');
     }
 }

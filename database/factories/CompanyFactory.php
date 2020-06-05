@@ -9,9 +9,17 @@ $factory->define(Company::class, function (Faker $faker) {
     return [
         'name' => $faker->company,
         'email' => $faker->companyEmail,
+        'address' => $faker->address,
+        'phone' => $faker->phoneNumber,
+        'whatsapp' => $faker->phoneNumber,
+        'social' => $faker->randomHtml(),
+        'city_id' => 1,
         'score' => $faker->randomFloat(2,1, 5),
-        'delivery' => $faker->boolean,
+        'delivery' => $faker->randomFloat(),
+        'zone' => 'asdasdadasd',
         'status' => $faker->numberBetween(1,3),
-        'category_id' => $faker->numberBetween(1,5),
+        'attention_hours' => 'asdasdads',
+        'category_id' => $faker->numberBetween(1,2),
+        'company_id' => ''
     ];
 });

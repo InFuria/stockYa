@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
 //'dni', 'username', 'name', 'address', 'phone', 'status', 'email', 'password'
 $factory->define(User::class, function (Faker $faker) {
     return [
-        'dni' => $faker->numberBetween(1000000, 999999),
+        'dni' => $faker->numberBetween(1, 9999),
         'username' => $faker->userName,
         'name' => $faker->name,
         'address' => $faker->address,
