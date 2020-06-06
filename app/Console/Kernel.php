@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
-        $schedule->command('personal:purgue')->everyThirtyMinutes();
+        $schedule->command('personal:purgue')->everyMinute();
     }
 
     /**

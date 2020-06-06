@@ -26,13 +26,14 @@ class ProductRequest extends FormRequest
         return [
             'slug' => 'required',
             'name' => 'required|string',
-            'description' => 'string',
+            'description' => 'required|string',
             'type' => 'string',
             'price' => 'required|numeric',
             'category_id' => 'required|integer',
             'company_id' => 'required|integer',
             'status' => 'integer',
-            'visits' => 'integer'
+            'visits' => 'integer',
+            'image' => 'array'
         ];
     }
 }
