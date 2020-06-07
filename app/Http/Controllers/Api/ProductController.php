@@ -13,6 +13,7 @@ use App\WebSale;
 use App\WebSaleDetail;
 use App\WebSaleRecord;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -200,10 +201,23 @@ class ProductController extends Controller
         }
     }
 
-    public function update(ProductRequest $request, Product $product)
+    public function update(Request $request, Product $product)
     {
         DB::beginTransaction();
         try {
+
+            $request->validate([
+                'slug' => 'string',
+                'name' => 'string',
+                'description' => 'string',
+                'type' => 'string',
+                'price' => 'numeric',
+                'category_id' => 'integer',
+                'company_id' => 'integer',
+                'status' => 'integer',
+                'visits' => 'integer',
+                'image' => 'array'
+            ]);
 
             $product->update($request->all());
 

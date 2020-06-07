@@ -22,13 +22,15 @@
         "type":"normal",
         "image":"",
         "price":"4300",
-        "category_id":"1",
-        "company_id":"1"
+        "category_id":1,
+        "company_id":1
         }</div>
     <button onclick="openTest('productPost')">POST</button>
 
 </div>
-
+<hr>
+<button onclick="openTest('auth')">AUTH</button>
+<button onclick="openTest('users')">USERS</button>
 <hr>
 <div>
     PRODUCT POST
@@ -39,14 +41,23 @@
 <output id="out"></output>
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
+    var token
     class Test{
         constructor(){
             this.getdata = null
             this.out = document.querySelector("#out")
         }
         productList(){
-            fetch('../api/products')
+            let configRequest = {
+                'method':'GET',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token.token}`
+            }
+            console.log({configRequest})
+            fetch('../api/products', configRequest)
                 .then( async response => {
+                    console.log({response})
                     this.getdata = await response.json()
                     this.print()
                 }).catch(function (error) {
@@ -56,7 +67,27 @@
 
         productPost(){
             let val = JSON.parse(document.querySelector("#valuepost").innerHTML.trim())
-            let url = '../api/products/'
+            let url = '../api/products'
+            console.log({url}, val)
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token.token}`
+                },
+                body: JSON.stringify(val)
+            }).then( async response => {
+                this.getdata = await response.json()
+                this.print()
+            }).catch(function (error) {
+                console.log({error});
+            });
+        }
+
+        auth(){
+            let val = {"username":"ely.admin" , "password":"undertale"}
+            let url = '../api/auth/login'
             console.log({url}, val)
             fetch(url, {
                 method: 'POST',
@@ -67,8 +98,30 @@
                 body: JSON.stringify(val)
             }).then( async response => {
                 this.getdata = await response.json()
+                token = this.getdata
                 this.print()
             }).catch(function (error) {
+                console.log({error});
+            });
+        }
+
+        users(){
+            let configRequest = {
+                'method':'GET',
+                'headers': {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token.token}`,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }
+            fetch('../api/auth/user', configRequest)
+                .then( async response => {
+                    console.log(response);
+                    console.log({response})
+                    this.getdata = await response.json()
+                    this.print()
+                }).catch(function (error) {
                 console.log({error});
             });
         }

@@ -6,6 +6,7 @@ use App\Company;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyRequest;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -79,8 +80,27 @@ class CompanyController extends Controller
         }
     }
 
-    public function update(CompanyRequest $request, Company $company){
+    public function update(Request $request, Company $company){
         try {
+
+                $request->validate([
+                'name' => 'string',
+                'address' => 'string',
+                'email' => 'string',
+                'phone' => 'string',
+                'whatsapp' => 'string',
+                'social' => 'string',
+                'city_id' => 'integer',
+                'image' => 'array',
+                'score' => 'integer',
+                'delivery' => 'integer',
+                'zone' => 'string',
+                'status' => 'integer',
+                'attention_hours' => 'string',
+                'category_id' => 'integer',
+                'company_id' => 'integer',
+                'visits' => 'integer'
+            ]);
 
             $company->update($request->all());
 
