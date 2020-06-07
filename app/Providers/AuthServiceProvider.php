@@ -33,15 +33,5 @@ class AuthServiceProvider extends ServiceProvider
         Passport::tokensExpireIn(Carbon::now()->setTimezone('America/Asuncion')->addMinutes(30));
         //Passport::refreshTokensExpireIn(now()->addDays(30));
         Passport::personalAccessTokensExpireIn(Carbon::now()->setTimezone('America/Asuncion')->addHours(24));
-
-        Passport::tokensCan([
-            'place-orders' => 'Place orders',
-            'check-status' => 'Check order status',
-        ]);
-
-        Passport::setDefaultScope([
-            'check-status',
-            'place_orders',
-        ]);
     }
 }
