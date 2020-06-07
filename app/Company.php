@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Company extends Model
 {
     protected $fillable = [
-        'name', 'address', 'email', 'phone', 'whatsapp', 'social', 'city_id', 'score', 'delivery', 'zone', 'status',
+        'name', 'slug', 'address', 'email', 'phone', 'whatsapp', 'social', 'city_id', 'score', 'delivery', 'zone', 'status',
         'attention_hours','category_id', 'company_id', 'visits'
     ];
     protected $hidden = ['pivot'];
@@ -20,6 +20,10 @@ class Company extends Model
         static::creating(function ($query) {
             $query->status = 1;
         });
+    }
+
+    public function setSlugAttribute($value){
+        $this->attributes['slug'] = '+' . $value;
     }
 
     public function stock(){

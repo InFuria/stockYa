@@ -49,7 +49,7 @@ class AuthController extends Controller
             return response()->json([
                 'success' => true,
                 'token_type' => $response["token_type"],
-                'access_token' => $response["access_token"],
+                'token' => $response["access_token"],
                 'expires' => now()->addHours(24)->format('Y-m-d H:i:s'),
                 'user' => $user], 201);
 
@@ -89,6 +89,7 @@ class AuthController extends Controller
                     return response()->json([
                         'success' => true,
                         'token_type' => $response["token_type"],
+                        'token' => $user->token,
                         'user' => $user
                     ]);
 
@@ -96,7 +97,7 @@ class AuthController extends Controller
                 return response()->json([
                     'success' => true,
                     'token_type' => $response["token_type"],
-                    'access_token' => $response["access_token"],
+                    'token' => $response["access_token"],
                     'expires_in' => now()->addHours(1)->format('Y-m-d H:i:s'),
                     'user' => $user
                 ]);
