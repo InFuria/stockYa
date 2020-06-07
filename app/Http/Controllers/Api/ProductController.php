@@ -65,7 +65,7 @@ class ProductController extends Controller
 
         factory(User::class, 50)->create();
 
-        factory(Company::class, 50)->create();
+        factory(Company::class, 5)->create();
         factory(ProductCategory::class, 50)->create();
         factory(Product::class, 50)->create();
 
