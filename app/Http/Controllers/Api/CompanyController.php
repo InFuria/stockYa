@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Company;
+use App\File;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanyRequest;
 use Illuminate\Database\QueryException;
@@ -42,6 +43,10 @@ class CompanyController extends Controller
         try {
             $company->files = $company->files->map->only('id', 'name');
 
+            $category = DB::table('company_categories')->where('id', $company->category_id)->first();
+            unset($company->category_id);
+            $company->category = $category;
+
             return response()->json($company->attributesToArray(), 200);
 
         } catch (\Exception $e) {
@@ -61,6 +66,12 @@ class CompanyController extends Controller
                     $data[$value] = ['origin' => 'company'];
                 }
                 $company->files()->sync($data);
+            }
+
+            foreach (request()->image as $key) {
+                $file = File::find($key);
+                $file->apply = 1;
+                $file->save();
             }
 
             DB::commit();
@@ -106,9 +117,23 @@ class CompanyController extends Controller
 
             if (request()->get('image')){
                 foreach (request()->get('image') as $value){
-                    $data[$value] = ['origin' => 'company'];
+                    $data[$value] = ['origin' => 'company', 'apply' => 1];
                 }
                 $company->files()->sync($data);
+            }
+
+            $old_files = $company->files->pluck('id')->toArray();
+            foreach (request()->image as $key) {
+                $file = File::find($key);
+                $file->apply = 1;
+                $file->save();
+            }
+
+            $old_files = array_diff($old_files, request()->image);
+            foreach ($old_files as $key){
+                $file = File::find($key);
+                $file->apply = 0;
+                $file->save();
             }
 
             $company->image =  $company->files->map->only('id', 'name');
