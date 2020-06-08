@@ -42,6 +42,10 @@ class CompanyController extends Controller
         try {
             $company->files = $company->files->map->only('id', 'name');
 
+            $category = DB::table('company_categories')->where('id', $company->category_id)->first();
+            unset($company->category_id);
+            $company->category = $category;
+
             return response()->json($company->attributesToArray(), 200);
 
         } catch (\Exception $e) {
@@ -58,7 +62,7 @@ class CompanyController extends Controller
 
             if (request()->get('image')){
                 foreach (request()->get('image') as $value){
-                    $data[$value] = ['origin' => 'company'];
+                    $data[$value] = ['origin' => 'company', 'apply' => 1];
                 }
                 $company->files()->sync($data);
             }
@@ -106,7 +110,7 @@ class CompanyController extends Controller
 
             if (request()->get('image')){
                 foreach (request()->get('image') as $value){
-                    $data[$value] = ['origin' => 'company'];
+                    $data[$value] = ['origin' => 'company', 'apply' => 1];
                 }
                 $company->files()->sync($data);
             }

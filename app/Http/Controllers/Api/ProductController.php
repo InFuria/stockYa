@@ -148,9 +148,15 @@ class ProductController extends Controller
 
             if (request()->get('image')){
                 foreach (request()->get('image') as $value){
-                    $data[$value] = ['origin' => 'product'];
+                    $data[$value] = ['origin' => 'product', 'apply' => 1];
                 }
                 $product->files()->sync($data);
+            }
+
+            foreach (request()->image as $key) {
+                $file = File::find($key);
+                $file->apply = 1;
+                $file->save();
             }
 
             DB::commit();
@@ -178,9 +184,10 @@ class ProductController extends Controller
         try {
 
             $product->sold = 0;
-            $sale = WebSaleDetail::where('product_id', $product->id)->first();
+            $detail = WebSaleDetail::where('product_id', $product->id)->first();
+            $sale = WebSale::find($detail->web_sale_id);
 
-            if ($sale != null)
+            if ($detail != null && $sale->status == 1)
                 $product->sold = WebSaleDetail::selectRaw("sum(quantity) as quantity")
                     ->join('web_sales', 'web_sales.id', '=', 'web_sale_detail.web_sale_id')
                     ->where('web_sales.status', 1)
@@ -188,9 +195,13 @@ class ProductController extends Controller
                     ->groupByRaw("product_id")->orderBy('product_id')
                     ->first()->quantity;
 
+            $category = DB::table('products_categories')->where('id', $product->category_id)->first();
+            unset($product->category_id);
+            $product->category = $category;
+
             $product->company_detail = $product->company;
             $product->tags = $product->tags;
-            $product->stock = $product->stock['quantity'];
+            $product->stock = $product->stock == null ? 0 : $product->stock['quantity'];
             $product->files = $product->files->map->only('id', 'name');
 
             return response()->json($product->attributesToArray());
@@ -229,7 +240,7 @@ class ProductController extends Controller
 
             if (request()->get('image')){
                 foreach (request()->get('image') as $value){
-                    $data[$value] = ['origin' => 'product'];
+                    $data[$value] = ['origin' => 'product', 'apply' => 1];
                 }
                 $product->files()->sync($data);
             }
