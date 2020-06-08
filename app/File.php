@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class File extends Model
 {
+    public $timestamps = null;
     protected $table = 'files';
     protected $hidden = ['pivot'];
     protected $fillable = ['slug', 'name', 'status' , 'apply'];

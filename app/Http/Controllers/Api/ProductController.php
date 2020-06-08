@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Company;
+use App\File;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Product;
@@ -17,7 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use phpDocumentor\Reflection\File;
+
 
 class ProductController extends Controller
 {
@@ -148,7 +149,7 @@ class ProductController extends Controller
 
             if (request()->get('image')){
                 foreach (request()->get('image') as $value){
-                    $data[$value] = ['origin' => 'product', 'apply' => 1];
+                    $data[$value] = ['origin' => 'product'];
                 }
                 $product->files()->sync($data);
             }
@@ -238,11 +239,26 @@ class ProductController extends Controller
             if (request()->get('tags'))
                 $product->tags()->sync(request()->tags);
 
+            $old_files = $product->files->pluck('id')->toArray();
+
             if (request()->get('image')){
                 foreach (request()->get('image') as $value){
-                    $data[$value] = ['origin' => 'product', 'apply' => 1];
+                    $data[$value] = ['origin' => 'product'];
                 }
                 $product->files()->sync($data);
+            }
+
+            foreach (request()->image as $key) {
+                $file = File::find($key);
+                $file->apply = 1;
+                $file->save();
+            }
+
+            $old_files = array_diff($old_files, request()->image);
+            foreach ($old_files as $key){
+                $file = File::find($key);
+                $file->apply = 0;
+                $file->save();
             }
 
             $product->save();
@@ -250,7 +266,7 @@ class ProductController extends Controller
 
             $product->company = $product->company;
             $product->tags = $product->tags;
-            $product->stock = $product->stock["quantity"];
+            $product->stock = $product->stock == null ? 0 : $product->stock['quantity'];
             $product->image =  $product->files->map->only('id', 'name');
 
             return response()->json([
