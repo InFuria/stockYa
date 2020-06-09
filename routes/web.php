@@ -1,5 +1,8 @@
 <?php
 
+use Illuminate\Http\Request;
+
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -19,4 +22,15 @@ Route::get('/', function (){
 
 Route::get('/frontend', function (){
     return view('frontend');
+});
+
+Route::get('/admin', function (){
+    return view('admin');
+});
+
+Route::get('/admin/{folder}/{file}', function (Request $request){
+    $type = 'css';
+    $type = $request->folder == 'js' || $request->folder == 'components' ? 'javascript' : $type;
+    return response( file_get_contents( public_path('admin/'.$request->folder."/".$request->file) ) )
+            ->header('Content-Type', 'text/'.$type);
 });
