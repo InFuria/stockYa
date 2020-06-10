@@ -13,6 +13,7 @@ use App\User;
 use App\WebSale;
 use App\WebSaleDetail;
 use App\WebSaleRecord;
+use Carbon\Carbon;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -142,7 +143,10 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
 
-            $product = Product::create($request->all());
+            $request = $request->all();
+            $request['slug'] = urlencode($request['name']) . '+' . Carbon::now()->format('d_m_y');
+
+            $product = Product::create($request);
 
             if (request()->get('tags'))
                 $product->tags()->attach(request()->tags);
@@ -152,12 +156,12 @@ class ProductController extends Controller
                     $data[$value] = ['origin' => 'product'];
                 }
                 $product->files()->sync($data);
-            }
 
-            foreach (request()->image as $key) {
-                $file = File::find($key);
-                $file->apply = 1;
-                $file->save();
+                foreach (request()->image as $key) {
+                    $file = File::find($key);
+                    $file->apply = 1;
+                    $file->save();
+                }
             }
 
             DB::commit();
@@ -186,7 +190,8 @@ class ProductController extends Controller
 
             $product->sold = 0;
             $detail = WebSaleDetail::where('product_id', $product->id)->first();
-            $sale = WebSale::find($detail->web_sale_id);
+
+            $sale = isset($detail) ? WebSale::find($detail->web_sale_id) : null;
 
             if ($detail != null && $sale->status == 1)
                 $product->sold = WebSaleDetail::selectRaw("sum(quantity) as quantity")
@@ -219,7 +224,6 @@ class ProductController extends Controller
         try {
 
             $request->validate([
-                'slug' => 'string',
                 'name' => 'string',
                 'description' => 'string',
                 'type' => 'string',
@@ -231,7 +235,10 @@ class ProductController extends Controller
                 'image' => 'array'
             ]);
 
-            $product->update($request->all());
+            $request = $request->all();
+            $request['slug'] = urlencode($request['name']) . '+' . Carbon::now()->format('d_m_y');
+
+            $product->update($request);
 
             if (request()->get('company_id'))
                 $product->company()->update(['company_id' => request()->company_id]);
@@ -246,20 +253,20 @@ class ProductController extends Controller
                     $data[$value] = ['origin' => 'product'];
                 }
                 $product->files()->sync($data);
+
+                foreach (request()->image as $key) {
+                    $file = File::find($key);
+                    $file->apply = 1;
+                    $file->save();
+                }
             }
 
-            foreach (request()->image as $key) {
-                $file = File::find($key);
-                $file->apply = 1;
-                $file->save();
-            }
-
-            $old_files = array_diff($old_files, request()->image);
+            /*$old_files = array_diff($old_files, request()->image);
             foreach ($old_files as $key){
                 $file = File::find($key);
                 $file->apply = 0;
                 $file->save();
-            }
+            }*/
 
             $product->save();
             DB::commit();
