@@ -31,7 +31,7 @@ Route::post('products/{product}/visit', 'Api\ProductController@visits');
 Route::post('companies/{company}/visit', 'Api\CompanyController@visits');
 
 
-Route::middleware(['auth:api'])->group(function () {
+#Route::middleware(['auth:api'])->group(function () {
 
     /** USER ROUTES */
     Route::post('users','Api\UserController@store');
@@ -78,7 +78,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('files', 'Api\FileController@getFile');
     Route::post('files', 'Api\FileController@store');
     Route::get('files/apply', 'Api\FileController@apply');
-});
+#});
 
 /** PASSPORT **/
 Route::group(['prefix' => 'auth'], function () {

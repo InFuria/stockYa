@@ -56,10 +56,9 @@ class CompaniesList{
         company.category_id = parseInt(company.category_id)
         company.zone = String(company.zone)
         delete company.category
+        encodeURI
         let request = {
             headers:{
-                'Authorization': `Bearer ${token().token}`,
-                'X-Requested-With': 'XMLHttpRequest',
                 'Accept':'application/json',
                 'Content-Type':'application/json'
             },
