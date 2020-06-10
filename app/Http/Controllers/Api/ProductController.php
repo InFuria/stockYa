@@ -148,25 +148,14 @@ class ProductController extends Controller
 
             $product = Product::create($request);
 
+            File::sync([], request()->image, $product, 'product');
+
             if (request()->get('tags'))
                 $product->tags()->attach(request()->tags);
 
-            if (request()->get('image')){
-                foreach (request()->get('image') as $value){
-                    $data[$value] = ['origin' => 'product'];
-                }
-                $product->files()->sync($data);
-
-                foreach (request()->image as $key) {
-                    $file = File::find($key);
-                    $file->apply = 1;
-                    $file->save();
-                }
-            }
-
             DB::commit();
 
-            $product->image = $product->files->map->only('id', 'name');
+            $product->image =  Product::find($product->id)->image->map->only('id', 'name');
             $product->tags = $product->tags;
 
             return response()->json([
@@ -208,7 +197,7 @@ class ProductController extends Controller
             $product->company_detail = $product->company;
             $product->tags = $product->tags;
             $product->stock = $product->stock == null ? 0 : $product->stock['quantity'];
-            $product->files = $product->files->map->only('id', 'name');
+            $product->image = $product->image->map->only('id', 'name');
 
             return response()->json($product->attributesToArray());
 
@@ -240,41 +229,22 @@ class ProductController extends Controller
 
             $product->update($request);
 
+            $old_files = $product->image->pluck('id')->toArray();
+            File::sync($old_files, request()->image, $product, 'product');
+            $product->image = Product::find($product->id)->image->map->only('id', 'name');
+
             if (request()->get('company_id'))
                 $product->company()->update(['company_id' => request()->company_id]);
 
             if (request()->get('tags'))
                 $product->tags()->sync(request()->tags);
 
-            $old_files = $product->files->pluck('id')->toArray();
-
-            if (request()->get('image')){
-                foreach (request()->get('image') as $value){
-                    $data[$value] = ['origin' => 'product'];
-                }
-                $product->files()->sync($data);
-
-                foreach (request()->image as $key) {
-                    $file = File::find($key);
-                    $file->apply = 1;
-                    $file->save();
-                }
-            }
-
-            /*$old_files = array_diff($old_files, request()->image);
-            foreach ($old_files as $key){
-                $file = File::find($key);
-                $file->apply = 0;
-                $file->save();
-            }*/
-
-            $product->save();
             DB::commit();
 
             $product->company = $product->company;
             $product->tags = $product->tags;
             $product->stock = $product->stock == null ? 0 : $product->stock['quantity'];
-            $product->image =  $product->files->map->only('id', 'name');
+            $product->image =  Product::find($product->id)->image->map->only('id', 'name');
 
             return response()->json([
                 'message' => 'El producto se ha actualizado!',
