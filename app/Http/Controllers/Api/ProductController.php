@@ -190,7 +190,8 @@ class ProductController extends Controller
 
             $product->sold = 0;
             $detail = WebSaleDetail::where('product_id', $product->id)->first();
-            $sale = WebSale::find($detail->web_sale_id);
+
+            $sale = isset($detail) ? WebSale::find($detail->web_sale_id) : null;
 
             if ($detail != null && $sale->status == 1)
                 $product->sold = WebSaleDetail::selectRaw("sum(quantity) as quantity")
