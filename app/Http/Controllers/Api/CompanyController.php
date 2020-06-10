@@ -41,6 +41,7 @@ class CompanyController extends Controller
     public function select(Company $company)
     {
         try {
+
             $company->files = $company->files->map->only('id', 'name');
 
             $category = DB::table('company_categories')->where('id', $company->category_id)->first();
@@ -59,19 +60,22 @@ class CompanyController extends Controller
         DB::beginTransaction();
         try {
 
-            $company = Company::create($request->all());
+            $request = $request->all();
+            $request['slug'] = urlencode($request['name']);
+
+            $company = Company::create($request);
 
             if (request()->get('image')){
                 foreach (request()->get('image') as $value){
                     $data[$value] = ['origin' => 'company'];
                 }
                 $company->files()->sync($data);
-            }
 
-            foreach (request()->image as $key) {
-                $file = File::find($key);
-                $file->apply = 1;
-                $file->save();
+                foreach (request()->image as $key) {
+                    $file = File::find($key);
+                    $file->apply = 1;
+                    $file->save();
+                }
             }
 
             DB::commit();
@@ -96,6 +100,7 @@ class CompanyController extends Controller
 
                 $request->validate([
                 'name' => 'string',
+                'slug' => 'string',
                 'address' => 'string',
                 'email' => 'string',
                 'phone' => 'string',
@@ -113,28 +118,32 @@ class CompanyController extends Controller
                 'visits' => 'integer'
             ]);
 
-            $company->update($request->all());
+            $request = $request->all();
+            $request['slug'] = urlencode($request['name']);
+
+            $company->update($request);
 
             if (request()->get('image')){
                 foreach (request()->get('image') as $value){
                     $data[$value] = ['origin' => 'company', 'apply' => 1];
                 }
                 $company->files()->sync($data);
+
+                foreach (request()->image as $key) {
+                    $file = File::find($key);
+                    $file->apply = 1;
+                    $file->save();
+                }
             }
 
-            $old_files = $company->files->pluck('id')->toArray();
-            foreach (request()->image as $key) {
-                $file = File::find($key);
-                $file->apply = 1;
-                $file->save();
-            }
+            /*$old_files = $company->files->pluck('id')->toArray();
 
             $old_files = array_diff($old_files, request()->image);
             foreach ($old_files as $key){
                 $file = File::find($key);
                 $file->apply = 0;
                 $file->save();
-            }
+            }*/
 
             $company->image =  $company->files->map->only('id', 'name');
 
