@@ -42,7 +42,7 @@ class CompanyController extends Controller
     {
         try {
 
-            $company->files = $company->files->map->only('id', 'name');
+            $company->image = $company->image->map->only('id', 'name');
 
             $category = DB::table('company_categories')->where('id', $company->category_id)->first();
             unset($company->category_id);
@@ -65,21 +65,10 @@ class CompanyController extends Controller
 
             $company = Company::create($request);
 
-            if (request()->get('image')){
-                foreach (request()->get('image') as $value){
-                    $data[$value] = ['origin' => 'company'];
-                }
-                $company->files()->sync($data);
-
-                foreach (request()->image as $key) {
-                    $file = File::find($key);
-                    $file->apply = 1;
-                    $file->save();
-                }
-            }
-
+            File::sync([], request()->image, $company, 'company');
             DB::commit();
-            $company->image = $company->files->map->only('id', 'name');
+
+            $company->image =  Company::find($company->id)->image->map->only('id', 'name');
 
             return response()->json([
                 'message' => 'La compañia ha sido registrada con exito!',
@@ -98,9 +87,8 @@ class CompanyController extends Controller
     public function update(Request $request, Company $company){
         try {
 
-                $request->validate([
+            $request->validate([
                 'name' => 'string',
-                'slug' => 'string',
                 'address' => 'string',
                 'email' => 'string',
                 'phone' => 'string',
@@ -123,29 +111,9 @@ class CompanyController extends Controller
 
             $company->update($request);
 
-            if (request()->get('image')){
-                foreach (request()->get('image') as $value){
-                    $data[$value] = ['origin' => 'company', 'apply' => 1];
-                }
-                $company->files()->sync($data);
-
-                foreach (request()->image as $key) {
-                    $file = File::find($key);
-                    $file->apply = 1;
-                    $file->save();
-                }
-            }
-
-            /*$old_files = $company->files->pluck('id')->toArray();
-
-            $old_files = array_diff($old_files, request()->image);
-            foreach ($old_files as $key){
-                $file = File::find($key);
-                $file->apply = 0;
-                $file->save();
-            }*/
-
-            $company->image =  $company->files->map->only('id', 'name');
+            $old_files = $company->image->pluck('id')->toArray();
+            File::sync($old_files, request()->image, $company, 'company');
+            $company->image =  Company::find($company->id)->image->map->only('id', 'name');
 
             return response()->json([
                 'message' => 'La compañia se ha actualizado!',

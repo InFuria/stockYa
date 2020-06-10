@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Laravel\Passport\Client as OClient;
@@ -69,7 +70,8 @@ class AuthController extends Controller
                 $user = Auth::user();
                 $oClient = OClient::where('password_client', 1)->first();
 
-                $auth = $this->authorize('isAdmin', $user);
+                $auth = Gate::inspect('isAdmin', request()->user())->allowed();
+
                 $type = $auth == true ? 'personal' : '';
 
                 $response = $this->getToken($oClient, request('username'), request('password'), $type);
