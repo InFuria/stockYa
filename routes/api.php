@@ -25,13 +25,13 @@ Route::get('companies/{company}', 'Api\CompanyController@select');
 Route::get('categories/company', 'Api\CompanyCategoryController@getCategories');
 Route::get('categories/company/{category}', 'Api\CompanyCategoryController@select');
 Route::get('categories/products', 'Api\ProductCategoryController@getCategories');
-Route::get('categories/products', 'Api\ProductCategoryController@select');
+Route::get('categories/products/{category}', 'Api\ProductCategoryController@select');
 
 Route::post('products/{product}/visit', 'Api\ProductController@visits');
 Route::post('companies/{company}/visit', 'Api\CompanyController@visits');
 
 
-Route::middleware(['auth:api'])->group(function () {
+#Route::middleware(['auth:api'])->group(function () {
 
     /** USER ROUTES */
     Route::post('users','Api\UserController@store');
@@ -78,7 +78,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('files', 'Api\FileController@getFile');
     Route::post('files', 'Api\FileController@store');
     Route::get('files/apply', 'Api\FileController@apply');
-});
+#});
 
 /** PASSPORT **/
 Route::group(['prefix' => 'auth'], function () {
