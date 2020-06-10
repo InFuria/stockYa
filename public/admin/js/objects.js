@@ -54,31 +54,29 @@ class CompaniesList{
         let company = Object.assign({} , companyView)
         company.city_id = parseInt(company.city_id)
         company.category_id = parseInt(company.category_id)
-        company.zone = String(company.zone)
+        company.zone = String(company.zone.id)
         delete company.category
-        encodeURI
+        company.slug = encodeURI(company.name)
+
+        CompaniesList.exe('post' , company)
+    }
+    static put(company){
+        return CompaniesList.exe('put' , company)
+    }
+    static exe(methods, params, url){
+        params = typeof params == 'string' ? params : JSON.stringify(params)
         let request = {
+            methods, params,
+            url:API.dominio()+'companies',
+            responseType: 'json',responseEncoding: 'utf8',
             headers:{
                 'Accept':'application/json',
                 'Content-Type':'application/json'
-            },
-            method: 'POST',
-            body: JSON.stringify(company)
+            }
         }
+        request.url = url == undefined ? request.url : request.url + url
         console.log( { request } )
-        fetch( API.dominio()+'companies' , request).then( res => {
-            console.log({companies:res})
-        }).catch( error => console.log({error}) )
-    }
-    static put(company){
-        return true
-        return axios({
-            methods:'put',
-            url:API.dominio()+'companies/'+company.id,
-            params:{company},
-            responseType: 'json',responseEncoding: 'utf8',
-            headers:{'Authorization': `Bearer ${token().token}`}
-        })
+        return axios(request)
     }
 }
 

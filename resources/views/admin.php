@@ -157,6 +157,7 @@
 	</script>
 
 	
+	<script src="./admin/js/test.js"></script>
 	<script src="./admin/js/objects.js"></script>
 	<script src="./admin/components/companies.js"></script>
 	<script src="./admin/js/main.js"></script>
