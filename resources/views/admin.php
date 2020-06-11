@@ -1,5 +1,6 @@
 <?php
 	$mode =  strrpos($_SERVER['HTTP_HOST'],'dona') > 0 ? 'prod' : 'dev';
+	$mode = "prod";
 ?>
 
 <!DOCTYPE html>
@@ -22,9 +23,11 @@
 					dark
 					flat
 					>
-					<v-app-bar-nav-icon></v-app-bar-nav-icon>
-
-					<v-toolbar-title>Page title</v-toolbar-title>
+					<!--
+						<v-app-bar-nav-icon></v-app-bar-nav-icon>
+					-->
+			
+					<v-toolbar-title>Pedidos Goya</v-toolbar-title>
 
 					<v-spacer></v-spacer>
 
@@ -48,33 +51,6 @@
 						:key="item">
 							{{ item }}
 						</v-tab>
-
-						<v-menu
-							v-if="more.length"
-							bottom
-							left
-						>
-							<template v-slot:activator="{ on }">
-							<v-btn
-								text
-								class="align-self-center mr-4"
-								v-on="on"
-							>
-								more
-								<v-icon right>mdi-menu-down</v-icon>
-							</v-btn>
-							</template>
-
-							<v-list class="grey lighten-3">
-							<v-list-item
-								v-for="item in more"
-								:key="item"
-								@click="addItem(item)"
-							>
-								{{ item }}
-							</v-list-item>
-							</v-list>
-						</v-menu>
 						</v-tabs>
 					</template>
 					</v-toolbar>
@@ -157,9 +133,13 @@
 	</script>
 
 	
-	<script src="./admin/js/test.js"></script>
+	<script src="./admin/js/api.js"></script>
+	<script src="./admin/js/companiesList.js"></script>
+	<script src="./admin/js/productsList.js"></script>
 	<script src="./admin/js/objects.js"></script>
-	<script src="./admin/components/companies.js"></script>
+	<script src="./admin/components/imageUpload.js"></script>
+	<script src="./admin/components/companies.js?d=<?php echo date("h:m:s")?>"></script>
+	<script src="./admin/components/products.js?d=<?php echo date("h:m:s")?>"></script>
 	<script src="./admin/js/main.js"></script>
 	
 </body>
