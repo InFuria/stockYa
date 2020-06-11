@@ -26,6 +26,8 @@ Route::get('categories/company', 'Api\CompanyCategoryController@getCategories');
 Route::get('categories/company/{category}', 'Api\CompanyCategoryController@select');
 Route::get('categories/products', 'Api\ProductCategoryController@getCategories');
 Route::get('categories/products/{category}', 'Api\ProductCategoryController@select');
+Route::get('tags', 'Api\TagController@getTags');
+Route::get('tags/{tag}', 'Api\TagController@select');
 
 Route::post('products/{product}/visit', 'Api\ProductController@visits');
 Route::post('companies/{company}/visit', 'Api\CompanyController@visits');
@@ -48,6 +50,10 @@ Route::post('companies/{company}/visit', 'Api\CompanyController@visits');
     Route::post('products/{product}/status', 'Api\ProductController@status');
     Route::post('products/{product}/setScore', 'Api\ProductController@setScore');
     Route::post('products/{product}/setTags', 'Api\ProductController@setTags');
+
+    /** TAGS ROUTES */
+    Route::resource('tags', 'Api\TagController')->except(['index', 'create', 'edit', 'show']);
+    Route::post('tags/{tag}/status', 'Api\TagController@status');
 
     /** COMPANIES ROUTES **/
     Route::post('companies', 'Api\CompanyController@store');
