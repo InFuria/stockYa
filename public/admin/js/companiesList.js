@@ -22,7 +22,7 @@ class CompaniesList extends APIHelper{
     normalize(company){
         company.city_id = parseInt(company.city_id)
         company.category_id = parseInt(company.category_id)
-        company.zone = String(company.zone.id)
+        company.zone = typeof company.zone == 'object' ? String(company.zone.id) : String(company.zone)
         return company
     }
     push(company){
@@ -37,7 +37,7 @@ class CompaniesList extends APIHelper{
     getterInstance(){
         this.getter()
         .then( response => {
-            console.log(response)
+            this.nextBtn = response.data.next_page_url
             for( let company of response.data.data ){
                 if(company.image.length == 0){
                     company.image = [API.route('company','imageDefault').url]
@@ -58,7 +58,7 @@ class CompaniesList extends APIHelper{
     }
     create(companyView){
         let company = Object.assign({} , companyView)
-        this.exe('create' , company )
+        this.api('create' , company )
         .then( response => { 
             this.push(response.data.company)
          })
