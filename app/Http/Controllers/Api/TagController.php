@@ -68,7 +68,7 @@ class TagController extends Controller
         DB::beginTransaction();
         try {
             $request = $request->validate([
-                'name'     => 'required|string',
+                'name'     => 'string',
                 'type'     => 'integer',
                 'status'   => 'integer'
             ]);
