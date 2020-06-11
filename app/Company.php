@@ -19,6 +19,7 @@ class Company extends Model
 
         static::creating(function ($query) {
             $query->status = 1;
+            $query->city_id = 1;
         });
     }
 
