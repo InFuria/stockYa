@@ -40,7 +40,7 @@ Vue.component("companies", {
         toggleProduct(company) {
             products().getter(company)
                 .then(response => {
-                    for(let product of response.data.data.products){
+                    for(let product of response.data.products){
                         products().push(product)
                     }
                     console.log(products().list)
@@ -106,33 +106,7 @@ Vue.component("companies", {
                             <v-toolbar-title>{{ company.name }}</v-toolbar-title>
                             <v-spacer></v-spacer>
                         </v-toolbar>
-                        <h3 class="pa-3">Productos</h3>
-                        <v-card
-                            class="mx-auto"
-                            max-width="344"
-                            outlined
-                            v-for="product of company.products"
-                            :key="product.id"
-                        >
-                            <v-list-item three-line>
-                            <v-list-item-content>
-                                <div class="overline mb-4">OVERLINE</div>
-                                <v-list-item-title class="headline mb-1">Headline 5</v-list-item-title>
-                                <v-list-item-subtitle>Greyhound divisely hello coldly fonwderfully</v-list-item-subtitle>
-                            </v-list-item-content>
-
-                            <v-list-item-avatar
-                                tile
-                                size="80"
-                                color="grey"
-                            ></v-list-item-avatar>
-                            </v-list-item>
-
-                            <v-card-actions>
-                            <v-btn text>Button</v-btn>
-                            <v-btn text>Button</v-btn>
-                            </v-card-actions>
-                        </v-card>
+                        <products></products>
                     </v-card>
                 </v-dialog>
 

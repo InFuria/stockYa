@@ -1,5 +1,3 @@
-
-
 class ProductsList extends APIHelper{
     constructor(){
         super('product' , [
@@ -15,6 +13,8 @@ class ProductsList extends APIHelper{
         this.list = {}
     }
     normalize(product){
+        product["image"] = product["image"] == undefined ? [] : product["image"]
+        product["image"] = product["image"].length ? product["image"] : [API.route('product', 'imageDefault').url]
         product.prince = parseFloat(product.city_id).toFixed(2)
         product.category_id = parseInt(product.category_id)
         product.company_id = parseInt(product.company_id)
@@ -24,6 +24,8 @@ class ProductsList extends APIHelper{
     push(product){
         let list = this.list
         this.list = null
+        product["image"] = product["image"] == undefined ? [] : product["image"]
+        product["image"] = product["image"].length ? product["image"] : [API.route('product', 'imageDefault').url]
         list[product.name] = product
         this.list = list
     }

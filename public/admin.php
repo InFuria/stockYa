@@ -23,9 +23,11 @@
 					dark
 					flat
 					>
-					<v-app-bar-nav-icon></v-app-bar-nav-icon>
-
-					<v-toolbar-title>Page title</v-toolbar-title>
+					<!--
+						<v-app-bar-nav-icon></v-app-bar-nav-icon>
+					-->
+			
+					<v-toolbar-title>Pedidos Goya</v-toolbar-title>
 
 					<v-spacer></v-spacer>
 
@@ -136,7 +138,8 @@
 	<script src="./admin/js/productsList.js"></script>
 	<script src="./admin/js/objects.js"></script>
 	<script src="./admin/components/imageUpload.js"></script>
-	<script src="./admin/components/companies.js"></script>
+	<script src="./admin/components/companies.js?d=<?php echo date("h:m:s")?>"></script>
+	<script src="./admin/components/products.js?d=<?php echo date("h:m:s")?>"></script>
 	<script src="./admin/js/main.js"></script>
 	
 </body>

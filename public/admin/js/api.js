@@ -24,6 +24,7 @@ class API{
 				update:{method:'patch',url:'products/<id>'},
 				remove:{method:'delete',url:'products/<id>'},
                 status:{method:'post',url:'products/<id>/status'},
+                imageDefault:{url:'https://www.mageplaza.com/assets/img/extensions/product-labels.png'}
             },
 			image:{create:{method:'post',url:'files'}},
 		}
