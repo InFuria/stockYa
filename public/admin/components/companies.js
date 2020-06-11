@@ -270,7 +270,7 @@ Vue.component("companies", {
                             </div>
 
                             <div class="pa-5 mx-5">
-                                <image-upload @update="updateImages" :images="company"></image-upload>
+                                <image-upload @update="update" :images="company"></image-upload>
                             </div>                            
                         </v-list>
                     </v-card>

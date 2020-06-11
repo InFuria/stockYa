@@ -62,9 +62,6 @@ function vueLaunch() {
 			source: String
 		},
 		data() { return dataVue },
-		watch:{ 
-			search(v){ this.searchProccess(v) },
-		},
 		computed: { },
 		methods: {
 			authValid(){
