@@ -1,5 +1,6 @@
 // filescontrollers linea 20 no existe request/files para validar
 Vue.component('image-upload', {
+    props:["images"],
     data(){
       return {
         files: '',
@@ -42,6 +43,13 @@ Vue.component('image-upload', {
             </label>
             <v-btn class="green white--text" v-on:click="submitFiles()">Subir</v-btn>
             </div>
+
+            <v-row>
+              <v-col class="col" cols="3" v-for="(image , index) of images">
+                  <v-img :src="image"></v-img>
+                  <v-btn @click="$emit('remove',index)" class="ml-2" style="background-color:rgba(255,255,255,.75);position:absolute;margin-top:-4rem" text color="red">Eliminar</v-btn>
+              </v-col>
+          </v-row>
         </div>
         `
 })

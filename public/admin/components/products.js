@@ -182,7 +182,7 @@ Vue.component("products", {
 
                 </v-list>
                 <v-divider></v-divider>
-                <div class="pa-5 mx-5"><image-upload></image-upload></div>
+                <div class="pa-5 mx-5"><image-upload :images="company.image"></image-upload></div>
                 <v-btn v-if="!edit" @click="create" class="blue white--text ma-5" >Crear <v-icon>mdi-check</v-icon></v-btn>
             </v-card>
         </v-dialog>
