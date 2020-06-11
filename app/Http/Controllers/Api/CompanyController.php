@@ -16,19 +16,18 @@ class CompanyController extends Controller
     public function getCompanies(){
         try {
 
-            if (is_integer($status = request()->get('status'))){
+            $companies = Company::with('image:files.id,files.name')->orderByDesc('id');
 
-                $companies = Company::with('image:files.id,files.name')->where('status', $status)->paginate(15);
+            if (is_integer($status = request()->get('status'))){
+                $companies = $companies->where('status', $status);
             }
 
             if ($category_id = request()->get('category_id')){
-
-                $companies = Company::with('image:files.id,files.name')->where('category_id', $category_id)
-                    ->where('status', 1)->paginate(50);
+                $companies = $companies->where('category_id', $category_id)->where('status', 1);
             }
 
             // Por defecto se traen las empresas habilitadas
-            $companies = isset($companies) ? $companies : Company::with('image:files.id,files.name')->where('status', 1)->paginate(50);
+            $companies = isset($companies) ? $companies->paginate(50) : $companies->where('status', 1)->paginate(50);
 
             return response()->json($companies, 200);
 

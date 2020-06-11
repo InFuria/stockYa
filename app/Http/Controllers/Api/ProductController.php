@@ -83,14 +83,14 @@ class ProductController extends Controller
             if ($request = request()->get('company_id')) {
 
                 $products = Product::with('stock', 'image:files.id,files.name')
-                ->where('company_id', $request);
+                ->where('company_id', $request)->orderByDesc('id');
 
                 if (is_integer($status = request()->get('status'))) {
 
-                    $products = $products->where('status', request()->status)->get();
+                    $products = $products->where('status', request()->status)->paginate(50);
                 } else {
 
-                    $products = $products->get();
+                    $products = $products->paginate(50);
                 }
 
                 $company = Company::with('image:files.id,files.name')->where('id', $request)->first();
@@ -105,15 +105,15 @@ class ProductController extends Controller
 
                 $products = Product::with('company', 'image:files.id,files.name')
                     ->join('product_tag', 'product_tag.product_id', '=', 'products.id')
-                    ->where('product_tag.tag_id', request()->tag_id);
+                    ->where('product_tag.tag_id', request()->tag_id)->orderByDesc('id');
 
 
                 if (is_integer($status = request()->get('status'))) {
 
-                    $products = $products->where('status', request()->status)->get()->toArray();
+                    $products = $products->where('status', request()->status)->paginate(50);
                 } else {
 
-                    $products = $products->get()->toArray();
+                    $products = $products->paginate(50);
                 }
 
                 return response()->json([
@@ -124,10 +124,10 @@ class ProductController extends Controller
             if (is_integer($status = request()->get('status'))) {
 
                 $products = Product::where('status', (integer)request()->status)->with('company', 'tags', 'image:files.id,files.name')
-                    ->paginate(15);
+                    ->orderByDesc('id')->paginate(50);
             } else {
 
-                $products = Product::with('company', 'tags', 'image:files.id,files.name')->paginate(15);
+                $products = Product::with('company', 'tags', 'image:files.id,files.name')->orderByDesc('id')->paginate(50);
             }
 
             return response()->json($products);
