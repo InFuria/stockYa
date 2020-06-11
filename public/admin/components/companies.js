@@ -38,9 +38,12 @@ Vue.component("companies", {
             }
         },
         toggleProduct(company) {
-            API.getter("products", { company_id: company.id })
+            products().getter(company)
                 .then(response => {
-                    company.products = response.data.data
+                    for(let product of response.data.data.products){
+                        products().push(product)
+                    }
+                    console.log(products().list)
                     if (company == this.editProduct) {
                         this.modProduct = false
                         this.editProduct = null

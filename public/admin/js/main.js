@@ -7,6 +7,7 @@ var dataVue = new Object({
 		defaultCompanyImage:"./public/images/default.jpg",
 		color:{primary:"orange darken-4"},
 		companies:new CompaniesList,
+		products:new ProductsList,
 		categories:{product:[],company:[]},
 		zones:[
 			{ id: 1, name: "Norte" },
@@ -28,7 +29,10 @@ var dataVue = new Object({
 	
 })
 
-for(let key of ["show","companies","categories","color","zones","token"]){
+for(let key of [
+	"show","companies","categories","color","zones","token",
+	"products"
+	]){
 	eval(`function ${key}(k , v){
 		if(k == undefined){
 			return dataVue.${key}
