@@ -15,7 +15,7 @@ Vue.component("products", {
                 status: 1,
                 image: []
             },
-            itemNew:{},
+            productTarget:{},
             modNew:false
         }
     },
@@ -32,23 +32,23 @@ Vue.component("products", {
         toggle(product) {
             this.edit = false
             if(product != null){
-                this.itemNew == product
+                this.productTarget == product
                 this.edit = true
             }
             this.modNew = true
         },
         update() {
             if(this.edit == true){
-                components().update(this.itemNew)
+                components().update(this.productTarget)
             }
         },
         create(){
-            this.products.create(this.itemNew)
+            this.products.create(this.productTarget)
         }
     },
     mounted() {
         this.categories = categories()
-        this.itemNew = Object.assign({} , this.itemDefault)
+        this.productTarget = Object.assign({} , this.itemDefault)
     },
     template: `
     <v-row class="pa-2">
@@ -121,7 +121,7 @@ Vue.component("products", {
                                 <v-text-field
                                     @change="update"
                                     label="Nombre"
-                                    v-model="itemNew.name"
+                                    v-model="productTarget.name"
                                 ></v-text-field>
                             </v-list-item-title>
                         </v-list-item-content>
@@ -137,7 +137,7 @@ Vue.component("products", {
                                     @change="update"
                                     label="Precio"
                                     type="number"
-                                    v-model="itemNew.price"
+                                    v-model="productTarget.price"
                                 ></v-text-field>
                             </v-list-item-title>
                         </v-list-item-content>
@@ -156,7 +156,7 @@ Vue.component("products", {
                                     @change="update"
                                     label="Categoria"
                                     :items="categoriesProduct"
-                                    v-model="itemNew.category"
+                                    v-model="productTarget.category"
                                 ></v-select>
                             </v-list-item-title>
                         </v-list-item-content>
@@ -174,7 +174,7 @@ Vue.component("products", {
                                         <v-textarea
                                             @change="update"
                                             label="Descripción"
-                                            v-model="itemNew.description"
+                                            v-model="productTarget.description"
                                         ></v-textarea>
                                     </v-list-item-title>
                                 </v-list-item-content>
@@ -182,7 +182,7 @@ Vue.component("products", {
 
                 </v-list>
                 <v-divider></v-divider>
-                <div class="pa-5 mx-5"><image-upload :images="company.image"></image-upload></div>
+                <div class="pa-5 mx-5"><image-upload @update="update" :images="productTarget"></image-upload></div>
                 <v-btn v-if="!edit" @click="create" class="blue white--text ma-5" >Crear <v-icon>mdi-check</v-icon></v-btn>
             </v-card>
         </v-dialog>

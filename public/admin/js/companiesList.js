@@ -58,7 +58,7 @@ class CompaniesList extends APIHelper{
     }
     create(companyView){
         let company = Object.assign({} , companyView)
-        this.exe('create' , company )
+        this.api('create' , company )
         .then( response => { 
             this.push(response.data.company)
          })

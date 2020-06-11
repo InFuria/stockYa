@@ -3,7 +3,7 @@
 
 class API{
     static dominio(){
-        return "http://kaizen-donarosa.com/api/"
+        return "https://kaizen-donarosa.com/api/"
     }
     static routes(){
         return {

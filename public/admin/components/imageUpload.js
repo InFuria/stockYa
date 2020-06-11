@@ -33,6 +33,10 @@ Vue.component('image-upload', {
       },
       handleFilesUpload(){
         this.files = this.$refs.files.files;
+      },
+      remove(i){
+        this.images.image.slice(i , 1)
+        this.$emit('update' , images)
       }
     },
     template:`
@@ -45,9 +49,9 @@ Vue.component('image-upload', {
             </div>
 
             <v-row>
-              <v-col class="col" cols="3" v-for="(image , index) of images">
+              <v-col class="col" cols="3" v-for="(image , index) of images.image">
                   <v-img :src="image"></v-img>
-                  <v-btn @click="$emit('remove',index)" class="ml-2" style="background-color:rgba(255,255,255,.75);position:absolute;margin-top:-4rem" text color="red">Eliminar</v-btn>
+                  <v-btn @click="remove(index)" class="ml-2" style="background-color:rgba(255,255,255,.75);position:absolute;margin-top:-4rem" text color="red">Eliminar</v-btn>
               </v-col>
           </v-row>
         </div>
