@@ -132,11 +132,11 @@
 		}
 	</script>
 
-	
 	<script src="./admin/js/api.js"></script>
 	<script src="./admin/js/companiesList.js"></script>
 	<script src="./admin/js/productsList.js"></script>
 	<script src="./admin/js/objects.js"></script>
+	<script src="./admin/components/next.js"></script>
 	<script src="./admin/components/imageUpload.js"></script>
 	<script src="./admin/components/companies.js?d=<?php echo date("h:m:s")?>"></script>
 	<script src="./admin/components/products.js?d=<?php echo date("h:m:s")?>"></script>
