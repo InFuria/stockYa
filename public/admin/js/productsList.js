@@ -32,5 +32,11 @@ class ProductsList extends APIHelper{
     getter(company){
         return this.api('listFromCompany',{id:company.id})
     }
+    replace(product){
+        return this.api('replace' , product)
+    }
+    remove(product){
+        return this.api('remove' , product)
+    }
 }
 

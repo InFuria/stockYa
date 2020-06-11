@@ -37,7 +37,10 @@ Vue.component("products", {
             }
             this.modNew = true
         },
-        update(product , categoriesProduct , zones) {
+        update() {
+            if(this.edit == true){
+                components().update(this.itemNew)
+            }
         },
         create(){
             this.products.create(this.itemNew)
@@ -116,6 +119,7 @@ Vue.component("products", {
                         <v-list-item-content>
                             <v-list-item-title>
                                 <v-text-field
+                                    @change="update"
                                     label="Nombre"
                                     v-model="itemNew.name"
                                 ></v-text-field>
@@ -130,6 +134,7 @@ Vue.component("products", {
                         <v-list-item-content>
                             <v-list-item-title>
                                 <v-text-field
+                                    @change="update"
                                     label="Precio"
                                     type="number"
                                     v-model="itemNew.price"
@@ -148,6 +153,7 @@ Vue.component("products", {
                         <v-list-item-content>
                             <v-list-item-title >
                                 <v-select
+                                    @change="update"
                                     label="Categoria"
                                     :items="categoriesProduct"
                                     v-model="itemNew.category"
@@ -166,6 +172,7 @@ Vue.component("products", {
                                 <v-list-item-content>
                                     <v-list-item-title >
                                         <v-textarea
+                                            @change="update"
                                             label="Descripción"
                                             v-model="itemNew.description"
                                         ></v-textarea>

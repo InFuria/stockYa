@@ -67,6 +67,9 @@ class CompaniesList extends APIHelper{
     replace(company){
         return this.api('replace' , company)
     }
+    remove(company){
+        return this.api('remove' , company)
+    }
     image(company){
         return this.api('put' , company)
     }
