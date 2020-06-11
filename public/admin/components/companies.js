@@ -15,20 +15,7 @@ Vue.component("companies", {
                 "category_id":1,"category":""
             },
             itemNew:{},
-            modNew:false,
-
-            valid: false,
-            firstname: '',
-            lastname: '',
-            nameRules: [
-                v => !!v || 'Name is required',
-                v => v.length <= 10 || 'Name must be less than 10 characters',
-            ],
-            email: '',
-            emailRules: [
-                v => !!v || 'E-mail is required',
-                v => /.+@.+/.test(v) || 'E-mail must be valid',
-            ],
+            modNew:false
         }
     },
     computed: {
@@ -51,9 +38,12 @@ Vue.component("companies", {
             }
         },
         toggleProduct(company) {
-            API.getter("products", { company_id: company.id })
+            products().getter(company)
                 .then(response => {
-                    company.products = response.data.data
+                    for(let product of response.data.products){
+                        products().push(product)
+                    }
+                    console.log(products().list)
                     if (company == this.editProduct) {
                         this.modProduct = false
                         this.editProduct = null
@@ -67,10 +57,11 @@ Vue.component("companies", {
                 })
         },
         update(company) {
+            this.companies.replace( company )
+            /*
             let companyNew = Object.assign({}, company)
             companyNew.category_id = Object.queryid(`name=${companyNew.category}` , this.categories.company)
-            CompaniesList.put( 'company' , company )
-            /*
+            this.companies.replace( 'company' , companyNew )
             for (let zone of this.zones) {
                 if (zone.name == companyNew.zone) {
                     companyNew.zone = zone.id
@@ -78,11 +69,11 @@ Vue.component("companies", {
                     return true
                 }
             }
-            */
             console.log({companyNew})
+            */
         },
         create(){
-            CompaniesList.create(this.itemNew)
+            this.companies.create(this.itemNew)
         }
     },
     mounted() {
@@ -115,33 +106,7 @@ Vue.component("companies", {
                             <v-toolbar-title>{{ company.name }}</v-toolbar-title>
                             <v-spacer></v-spacer>
                         </v-toolbar>
-                        <h3 class="pa-3">Productos</h3>
-                        <v-card
-                            class="mx-auto"
-                            max-width="344"
-                            outlined
-                            v-for="product of company.products"
-                            :key="product.id"
-                        >
-                            <v-list-item three-line>
-                            <v-list-item-content>
-                                <div class="overline mb-4">OVERLINE</div>
-                                <v-list-item-title class="headline mb-1">Headline 5</v-list-item-title>
-                                <v-list-item-subtitle>Greyhound divisely hello coldly fonwderfully</v-list-item-subtitle>
-                            </v-list-item-content>
-
-                            <v-list-item-avatar
-                                tile
-                                size="80"
-                                color="grey"
-                            ></v-list-item-avatar>
-                            </v-list-item>
-
-                            <v-card-actions>
-                            <v-btn text>Button</v-btn>
-                            <v-btn text>Button</v-btn>
-                            </v-card-actions>
-                        </v-card>
+                        <products></products>
                     </v-card>
                 </v-dialog>
 
@@ -292,7 +257,7 @@ Vue.component("companies", {
                                 </v-list-item-content>
                             </v-list-item>
 
-                            <div class="pa-3">
+                            <div class="pa-5 mx-5">
                                 Zonas
                                 <div>
                                     <v-btn small text 
@@ -303,13 +268,17 @@ Vue.component("companies", {
                                     >{{zone.name}}</v-btn>
                                 </div>
                             </div>
+
+                            <div class="pa-5 mx-5">
+                                <image-upload :images="company.image"></image-upload>
+                            </div>                            
                         </v-list>
                     </v-card>
                 </v-dialog>
 
 
                 <v-img
-                    src="./public/images/shop/galver-icon.png"
+                    :src="company.image[0]"
                     height="240px" dark
                 >
                     <div 
@@ -317,7 +286,7 @@ Vue.component("companies", {
                         style="position: relative;height: 100%;"
                     >
 
-                        <v-card-title class="pa-1" style="background-color:rgba(0,0,0,.1)">
+                        <v-card-title class="pa-1" style="background-color:rgba(0,0,0,.6)">
                             <v-btn dark icon>
                                 <v-icon>mdi-chevron-left</v-icon>
                             </v-btn>
@@ -335,7 +304,7 @@ Vue.component("companies", {
 
                         <v-spacer></v-spacer>
 
-                        <div class="black--text">
+                        <div class="white--text" style="background-color:rgba(0,0,0,.6)">
                             <div class="py-0 px-1 d-flex align-center justify-center" style="min-height:5rem;width:100%;word-break: break-word;text-align:center">
                                 {{ company.name }}
                             </div>
@@ -449,7 +418,7 @@ Vue.component("companies", {
                         </v-list-item-content>
                     </v-list-item>
 
-                    <div class="pa-3">
+                    <div class="pa-5 mx-5">
                         Zonas
                         <div>
                             <v-btn small text 

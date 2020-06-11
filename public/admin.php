@@ -132,7 +132,6 @@
 		}
 	</script>
 
-	
 	<script src="./admin/js/api.js"></script>
 	<script src="./admin/js/companiesList.js"></script>
 	<script src="./admin/js/productsList.js"></script>

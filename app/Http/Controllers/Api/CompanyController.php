@@ -24,11 +24,11 @@ class CompanyController extends Controller
             if ($category_id = request()->get('category_id')){
 
                 $companies = Company::with('image:files.id,files.name')->where('category_id', $category_id)
-                    ->where('status', 1)->paginate(15);
+                    ->where('status', 1)->paginate(50);
             }
 
             // Por defecto se traen las empresas habilitadas
-            $companies = isset($companies) ? $companies : Company::with('image:files.id,files.name')->where('status', 1)->paginate(15);
+            $companies = isset($companies) ? $companies : Company::with('image:files.id,files.name')->where('status', 1)->paginate(50);
 
             return response()->json($companies, 200);
 
