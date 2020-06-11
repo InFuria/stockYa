@@ -7,15 +7,30 @@ Vue.component("companies", {
             editProduct: null, modProduct: false,
             zones: zones(),
             itemDefault:{
-                "name":"learfen","address":"santa fe 264","email":"learfen001@gmail.com",
-                "phone":"3777","whatsapp":"3773","social":"-",
-                "city_id":1,"delivery":0,
-                "zone":{ "id": 1, "name": "Norte" },
-                "attention_hours":"-",
-                "category_id":1,"category":""
+                name: 'zapatos',
+                description: 'rojos',
+                type: 'normal',
+                price: 102.50,
+                category_id: 1,
+                company_id: 1,
+                status: 1,
+                image: []
             },
             itemNew:{},
-            modNew:false
+            modNew:false,
+
+            valid: false,
+            firstname: '',
+            lastname: '',
+            nameRules: [
+                v => !!v || 'Name is required',
+                v => v.length <= 10 || 'Name must be less than 10 characters',
+            ],
+            email: '',
+            emailRules: [
+                v => !!v || 'E-mail is required',
+                v => /.+@.+/.test(v) || 'E-mail must be valid',
+            ],
         }
     },
     computed: {
@@ -28,49 +43,12 @@ Vue.component("companies", {
         }
     },
     methods: {
-        toggle(company) {
-            if (company == this.edit) {
-                this.mod = false
-                this.edit = null
-            } else {
-                this.mod = true
-                this.edit = company
-            }
+        toggle(product) {
         },
-        toggleProduct(company) {
-            API.getter("products", { company_id: company.id })
-                .then(response => {
-                    company.products = response.data.data
-                    if (company == this.editProduct) {
-                        this.modProduct = false
-                        this.editProduct = null
-                    } else {
-                        this.modProduct = true
-                        this.editProduct = company
-                    }
-                })
-                .catch(function (error) {
-                    console.log({ error });
-                })
-        },
-        update(company) {
-            this.companies.replace( company )
-            /*
-            let companyNew = Object.assign({}, company)
-            companyNew.category_id = Object.queryid(`name=${companyNew.category}` , this.categories.company)
-            this.companies.replace( 'company' , companyNew )
-            for (let zone of this.zones) {
-                if (zone.name == companyNew.zone) {
-                    companyNew.zone = zone.id
-                    console.log({ companyNew })
-                    return true
-                }
-            }
-            console.log({companyNew})
-            */
+        update(product , categoriesProduct , zones) {
         },
         create(){
-            this.companies.create(this.itemNew)
+            this.products.create(this.itemNew)
         }
     },
     mounted() {

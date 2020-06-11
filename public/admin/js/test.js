@@ -120,7 +120,7 @@ class TestFile{
     }
 }
 
-const nodo = document.createElement
+const nodo = n => document.createElement(n)
 let testContainer = nodo("div")
     testContainer.id = "testContainer"
     testContainer.style="top:0;background:#eee;z-index:1000;padding:1rem"
