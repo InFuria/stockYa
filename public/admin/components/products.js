@@ -186,6 +186,7 @@ Vue.component("products", {
                 <v-btn v-if="!edit" @click="create" class="blue white--text ma-5" >Crear <v-icon>mdi-check</v-icon></v-btn>
             </v-card>
         </v-dialog>
+        <next :entity="'companies'" :query="{company_id:products.company_id}"></next>
     </v-row>
     `
 })

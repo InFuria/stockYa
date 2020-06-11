@@ -11,6 +11,7 @@ class ProductsList extends APIHelper{
             'status',
             'image'])
         this.list = {}
+        this.company_id = null
     }
     normalize(product){
         product["image"] = product["image"] == undefined ? [] : product["image"]
