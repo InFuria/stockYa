@@ -3,13 +3,14 @@
 
 class API{
     static dominio(){
-        return "http://kaizen-donarosa.com/api/"
+        return "https://kaizen-donarosa.com/api/"
     }
     static routes(){
         return {
 			company:{
                 list:{method:'get',url:'companies'},
-                create:{method:'post',url:'companies'},
+                listPage:{method:'get',url:'companies?page=<page>'},
+				create:{method:'post',url:'companies'},
 				replace:{method:'put',url:'companies/<id>'},
 				update:{method:'patch',url:'companies/<id>'},
 				remove:{method:'delete',url:'companies/<id>'},
@@ -18,7 +19,8 @@ class API{
             },
             product:{
                 list:{method:'get',url:'products'},
-				listFromCompany:{method:'get',url:'products?company_id=<id>'},
+				listPage:{method:'get',url:'products?page=<page>'},
+				listFromCompany:{method:'get',url:'products?company_id=<id>&page=<page>'},
 				create:{method:'post',url:'products'},
 				replace:{method:'put',url:'products/<id>'},
 				update:{method:'patch',url:'products/<id>'},
@@ -96,6 +98,8 @@ class APIHelper{
     constructor(entity , valids){
         this.entity = entity
         this.valids = valids
+        this.nextBtn = true
+        this.current_page = 1
     }
     valid(item){
         for(let a in item){
@@ -111,5 +115,22 @@ class APIHelper{
         let { method , url } = API.route(this.entity , action , params)
         console.log( { method , url } )
         return axios[method]( url , params)
+    }
+    next(params){
+        this.current_page++
+        let paramsUrl = {page:this.current_page}
+        if(params != undefined){
+            for(let a in params){
+                paramsUrl[a] = params[a]
+            }
+        }
+        let { method , url } = API.route(this.entity , 'listPage' , paramsUrl)
+        return axios[method]( url , {})
+        .then(response => {
+            this.nextBtn = response.next_page_url
+            for(let item of response.data[this.entity]){
+                this.push(item)
+            }
+        }).catch( error => {console.log({error})})
     }
 }

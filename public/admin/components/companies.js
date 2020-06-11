@@ -40,6 +40,8 @@ Vue.component("companies", {
         toggleProduct(company) {
             products().getter(company)
                 .then(response => {
+                    this.nextBtn = response.data.next_page_url
+                    this.company_id = company.id
                     for(let product of response.data.products){
                         products().push(product)
                     }
@@ -270,7 +272,7 @@ Vue.component("companies", {
                             </div>
 
                             <div class="pa-5 mx-5">
-                                <image-upload :images="company.image"></image-upload>
+                                <image-upload @update="update" :images="company"></image-upload>
                             </div>                            
                         </v-list>
                     </v-card>
@@ -434,6 +436,7 @@ Vue.component("companies", {
                 <v-btn @click="create" class="blue white--text ma-5" >Crear <v-icon>mdi-check</v-icon></v-btn>
             </v-card>
         </v-dialog>
+        <next :entity="'companies'"></next>
     </v-row>
     `
 })
