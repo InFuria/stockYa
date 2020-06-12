@@ -6,6 +6,7 @@ Vue.component("companies", {
             edit: null, mod: false,
             editProduct: null, modProduct: false,
             zones: zones(),
+            view:true,
             itemDefault:{
                 "name":"","address":"","email":"",
                 "phone":"","whatsapp":"","social":"",
@@ -58,12 +59,31 @@ Vue.component("companies", {
                     console.log({ error });
                 })
         },
+        reView(){
+            this.view=false
+            setTimeout( ()=> {
+                this.view = true
+            } , 100)
+        },
+        remove(company){
+            this.companies.remove(company)
+            .then( res => {
+                this.reView()
+                console.log({res})
+            })
+            .catch( error => {
+                this.reView()
+                console.log( {error} )
+            })
+        },
         update(company) {
             this.companies.replace( company )
             .then( res => {
                 console.log({res})
             })
-            .catch(error => console.log({error}))
+            .catch(error => {
+                console.log({error})
+            })
             /*
             let companyNew = Object.assign({}, company)
             companyNew.category_id = Object.queryid(`name=${companyNew.category}` , this.categories.company)
@@ -85,13 +105,13 @@ Vue.component("companies", {
                 this.edit= null
                 this.mod= false
                 this.itemNew = this.itemDefault
-                alert("creado")
+                this.reView()
             })
              .catch( error => {
                  console.log({error}) 
                  this.itemNew = this.itemDefault
-                 alert("creado")
-             })
+                 this.reView()
+            })
         }
     },
     mounted() {
@@ -99,7 +119,7 @@ Vue.component("companies", {
         this.itemNew = Object.assign({} , this.itemDefault)
     },
     template: `
-    <v-row class="pa-2">
+    <v-row class="pa-2" v-if="view">
         <v-col cols="12" xs="6" sm="6" md="3" lg="2" class="mt-3">
             <span
                 @click="modNew=true"
@@ -305,8 +325,8 @@ Vue.component("companies", {
                     >
 
                         <v-card-title class="pa-1" style="background-color:rgba(0,0,0,.6)">
-                            <v-btn dark icon>
-                                <v-icon>mdi-chevron-left</v-icon>
+                            <v-btn dark icon @click="remove(company)">
+                                <v-icon>mdi-close</v-icon>
                             </v-btn>
 
                             <v-spacer></v-spacer>

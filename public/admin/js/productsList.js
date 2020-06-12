@@ -16,6 +16,12 @@ class ProductsList extends APIHelper{
     normalize(product){
         product["image"] = product["image"] == undefined ? [] : product["image"]
         product["image"] = product["image"].length ? product["image"] : [API.route('product', 'imageDefault').url]
+        product.image = product.image == undefined ? [] : product.image
+        for (let index = 0; index < product.image.length; index++) {
+            if(product.image[index].search("http") > -1){
+                product.image.splice(index , 1)
+            }
+        }
         product.prince = parseFloat(product.city_id).toFixed(2)
         product.category_id = parseInt(product.category_id)
         product.company_id = parseInt(product.company_id)
@@ -27,7 +33,7 @@ class ProductsList extends APIHelper{
         this.list = null
         product["image"] = product["image"] == undefined ? [] : product["image"]
         product["image"] = product["image"].length ? product["image"] : [API.route('product', 'imageDefault').url]
-        list[product.name] = product
+        list["product-"+product.id] = product
         this.list = list
     }
     getter(company){
@@ -37,6 +43,9 @@ class ProductsList extends APIHelper{
         return this.api('replace' , product)
     }
     remove(product){
+        let list = this.list
+        delete list["product-"+product.id]
+        this.list = list
         return this.api('remove' , product)
     }
     create(productView){
