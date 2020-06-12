@@ -29,8 +29,6 @@ class CompaniesList extends APIHelper{
                 company.image.splice(index , 1)
             }
         }
-        company.social = String(company.social)
-        company.attention_hours = String(company.attention_hours)
         company.zone = typeof company.zone == 'object' ? String(company.zone.id) : String(company.zone)
         return company
     }

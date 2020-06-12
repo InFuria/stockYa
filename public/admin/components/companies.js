@@ -9,10 +9,10 @@ Vue.component("companies", {
             view:true,
             itemDefault:{
                 "name":"","address":"","email":"",
-                "phone":"","whatsapp":"","social":"",
+                "phone":"","whatsapp":"","social":"-",
                 "city_id":1,"delivery":0,
                 "zone":{},
-                "attention_hours":"",
+                "attention_hours":"-",
                 "category_id":1,"category":""
             },
             itemNew:{},
