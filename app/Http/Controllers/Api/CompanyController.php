@@ -84,7 +84,6 @@ class CompanyController extends Controller
     }
 
     public function update(Request $request, Company $company){
-        $all = $request->all();
         try {
             /*
             $request->validate([
@@ -119,7 +118,7 @@ class CompanyController extends Controller
             return response()->json([
                 'message' => 'La compañia se ha actualizado!',
                 'company' => $company->attributesToArray(),
-                'all' => $all
+                'all' => $request
             ], 200);
 
         } catch (QueryException $qe) {
