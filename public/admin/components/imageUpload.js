@@ -5,7 +5,8 @@ Vue.component('image-upload', {
       return {
         files: '',
         cursor:0,
-        responses:[]
+        responses:[],
+        item:this.images
       }
     },
     methods: {
@@ -19,11 +20,11 @@ Vue.component('image-upload', {
         axios.post( url , formData, 
             { headers: { 'Content-Type': 'multipart/form-data'}}
         ).then(response =>{
-            console.log({response})
+            this.item.image.push(response.data.id)
             if(this.cursor < this.files.length){
                 this.submitFiles()
             }else{
-                //this.$emit('upload' , )
+                this.$emit('update' , this.item)
             }
         })
         .catch( error =>{

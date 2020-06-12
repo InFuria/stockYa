@@ -41,9 +41,9 @@ class File extends Model
                 $assigned = DB::table('entities_files')->where('file_id', $key)->pluck('id');
 
                 if (!isset($assigned)){
-                $file = File::find($key);
-                $file->apply = 0;
-                $file->save();
+                    $file = File::find($key);
+                    $file->apply = 0;
+                    $file->save();
                 }
             }
         }
