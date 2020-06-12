@@ -33,8 +33,7 @@ class API{
     }
     static route(entity , action , data){
         let res = API.routes()[entity][action]
-        if(data != undefined && res.url.search("$") > -1){
-            console.log({data})
+        if(data != undefined && res.url.search("<") > -1){
             for(let a in data){
                 res.url = res.url.replace("<"+a+">" , data[a])
             }
@@ -112,9 +111,8 @@ class APIHelper{
     api(action, params){
         params = params == undefined ? {} : this.normalize(params)
         params = this.valid(params)
-        console.log({params})
         let { method , url } = API.route(this.entity , action , params)
-        console.log( { method , url } )
+        delete params.id
         return axios[method]( url , params)
     }
     next(params){
