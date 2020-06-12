@@ -212,7 +212,8 @@ class ProductController extends Controller
         DB::beginTransaction();
         try {
 
-            $request->validate([
+            // temporal
+            /*$request->validate([
                 'name' => 'string',
                 'description' => 'string',
                 'type' => 'string',
@@ -222,7 +223,7 @@ class ProductController extends Controller
                 'status' => 'integer',
                 'visits' => 'integer',
                 'image' => 'array'
-            ]);
+            ]);*/
 
             $request = $request->all();
             $request['slug'] = urlencode($request['name']) . '+' . Carbon::now()->format('d_m_y');

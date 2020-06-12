@@ -42,7 +42,7 @@ Vue.component("companies", {
                 .then(response => {
                     this.nextBtn = response.data.next_page_url
                     this.company_id = company.id
-                    for(let product of response.data.products){
+                    for(let product of response.data.products.data){
                         products().push(product)
                     }
                     console.log(products().list)
@@ -85,13 +85,13 @@ Vue.component("companies", {
     template: `
     <v-row class="pa-2">
         <v-col cols="12" xs="6" sm="6" md="3" lg="2" class="mt-3">
-            <span 
+            <span
                 @click="modNew=true"
                 class="mx-2 pa-3 elevation-2 d-flex justify-center align-center"
                 style="font-size:8rem;"
             >+</span>
         </v-col>
-        <v-col 
+        <v-col
             v-for="company of companies.list"
             cols="12" xs="6" sm="6" md="3" lg="2"
             :key="company.id"
@@ -262,9 +262,9 @@ Vue.component("companies", {
                             <div class="pa-5 mx-5">
                                 Zonas
                                 <div>
-                                    <v-btn small text 
+                                    <v-btn small text
                                         v-bind:class="[company.zone == zone.id ? 'blue white--text':'','py-1 px-2']"
-                                        v-for="zone of zones" 
+                                        v-for="zone of zones"
                                         :key="zone.id"
                                         @click="company.zone = zone.id;update(company)"
                                     >{{zone.name}}</v-btn>
@@ -273,7 +273,7 @@ Vue.component("companies", {
 
                             <div class="pa-5 mx-5">
                                 <image-upload @update="update" :images="company"></image-upload>
-                            </div>                            
+                            </div>
                         </v-list>
                     </v-card>
                 </v-dialog>
@@ -283,7 +283,7 @@ Vue.component("companies", {
                     :src="company.image[0]"
                     height="240px" dark
                 >
-                    <div 
+                    <div
                         class="d-flex flex-column justify-space-between"
                         style="position: relative;height: 100%;"
                     >
@@ -313,7 +313,7 @@ Vue.component("companies", {
                         </div>
                     </div>
                 </v-img>
-                
+
             </v-card>
         </v-col>
         <v-dialog v-model="modNew" fullscreen hide-overlay transition="dialog-bottom-transition">
@@ -423,7 +423,7 @@ Vue.component("companies", {
                     <div class="pa-5 mx-5">
                         Zonas
                         <div>
-                            <v-btn small text 
+                            <v-btn small text
                                 v-bind:class="[itemNew.zone == zone.id ? 'blue white--text':'','py-1 px-2']"
                                 v-for="zone of zones"
                                 :key="zone.id"

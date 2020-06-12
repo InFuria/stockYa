@@ -86,7 +86,8 @@ class CompanyController extends Controller
     public function update(Request $request, Company $company){
         try {
 
-            $request->validate([
+            // temporal
+            /*$request->validate([
                 'name' => 'string',
                 'address' => 'string',
                 'email' => 'string',
@@ -101,9 +102,9 @@ class CompanyController extends Controller
                 'status' => 'integer',
                 'attention_hours' => 'string',
                 'category_id' => 'integer',
-                'company_id' => 'integer',
+                'company_id' => 'nullable|integer',
                 'visits' => 'integer'
-            ]);
+            ]);*/
 
             $request = $request->all();
             $request['slug'] = urlencode($request['name']);
