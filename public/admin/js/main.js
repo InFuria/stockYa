@@ -84,7 +84,7 @@ function vueLaunch() {
 			}
 		},
 		mounted(){
-			this.auth()
+			this.authValid()
 		}
 	})
 }
