@@ -27,14 +27,13 @@ class FileController extends Controller
 
     public function store () {
         try{
-            if (request()->image->isValid())
-            {
-                $imageName = time().'.'.request()->image->getClientOriginalExtension();
-                FileController::storeDB($imageName);
-                request()->image->move(public_path('/uploadedimages'), $imageName);
 
-            }
-            return response()->json(["data"=>"Imagen no valida"], 200);
+            $imageName = time().'.'.request()->file->getClientOriginalExtension();
+            $store = FileController::storeDB($imageName);
+            request()->file->move(public_path('/uploadedimages'), $imageName);
+
+            return response()->json($store);
+
         } catch (\Exception $e){
             Log::error('FileController::store - ' . $e->getMessage());
             return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);
@@ -54,7 +53,6 @@ class FileController extends Controller
 
     static public function storeDB($name)
     {
-        //var_dump($name);
         DB::beginTransaction();
         try {
             $img = File::create([
@@ -66,9 +64,7 @@ class FileController extends Controller
 
             DB::commit();
 
-            return response()->json([
-                'message' => 'Imagen creada',
-                'img' => $img], 201);
+            return $img;
 
         } catch (QueryException $qe){
             DB::rollBack();

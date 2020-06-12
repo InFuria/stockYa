@@ -24,6 +24,7 @@ class File extends Model
 
     public static function sync($old, $new, $entity, $origin){
         if (isset($new)){
+            $data = [];
             foreach ($new as $key){
                 $data[$key] = ['origin' => "{$origin}"];
             }

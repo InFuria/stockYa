@@ -76,10 +76,10 @@ class CompanyController extends Controller
         } catch (QueryException $qe) {
             DB::rollBack();
             Log::error('CompanyController::store - ' . $qe->getMessage());
-            return response()->json(['request'=>$request->all(),'origin' => 'CompanyController::store', 'message' => $qe->getMessage()], 400);
+            return response()->json(['request'=>$request,'origin' => 'CompanyController::store > db', 'message' => $qe->getMessage()], 400);
         } catch (\Exception $e){
             Log::error('CompanyController::store - ' . $e->getMessage());
-            return response()->json(['request'=>$request->all(),'origin' => 'CompanyController::store', 'message' => $e->getMessage()], 400);
+            return response()->json(['request'=>$request,'origin' => 'CompanyController::store', 'message' => $e->getMessage()], 400);
         }
     }
 

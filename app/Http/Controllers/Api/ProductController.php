@@ -165,7 +165,7 @@ class ProductController extends Controller
         } catch (QueryException $qe) {
             DB::rollBack();
             Log::error('ProductController::store - ' . $qe->getMessage());
-            return response()->json(['origin' => 'ProductController::store', 'message' => $qe->getMessage()], 400);
+            return response()->json(['origin' => 'ProductController::store > db', 'message' => $qe->getMessage()], 400);
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('ProductController::store - ' . $e->getMessage());
@@ -254,7 +254,7 @@ class ProductController extends Controller
         } catch (QueryException $qe) {
             DB::rollBack();
             Log::error('ProductController::update - ' . $qe->getMessage());
-            return response()->json(['origin' => 'ProductController::update', 'message' => $qe->getMessage()], 400);
+            return response()->json(['origin' => 'ProductController::update > db', 'message' => $qe->getMessage()], 400);
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('ProductController::update - ' . $e->getMessage());
