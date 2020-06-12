@@ -23,18 +23,22 @@ class CompaniesList extends APIHelper{
         company.company_id = company.company_id == null ? 0 : parseInt(company.company_id)
         company.city_id = parseInt(company.city_id)
         company.category_id = parseInt(company.category_id)
+        company.image = company.image == undefined ? [] : company.image
         for (let index = 0; index < company.image.length; index++) {
             if(company.image[index].search("http") > -1){
                 company.image.splice(index , 1)
             }
         }
+        company.social = String(company.social)
+        company.attention_hours = String(company.attention_hours)
         company.zone = typeof company.zone == 'object' ? String(company.zone.id) : String(company.zone)
         return company
     }
     push(company){
         let list = this.list
         this.list = null
-        list[company.name] = company
+        list['company-'+company.id] = company
+        company.zone = company.zone == null ? 1 : company.zone
         this.list = list
     }
     getter(){
@@ -52,7 +56,7 @@ class CompaniesList extends APIHelper{
                         a = './uploadedimages/'+a+'.jpg'
                     }
                 }
-                company['ui'] = {view:false}
+                company['ui'] = {view:true}
                 company.zone = typeof company.zone == "string" ? 1 : company.zone
                 company['category'] = Object.queryid(`${company.category_id}=name` , categories().company)
                 this.push(company)
@@ -66,10 +70,14 @@ class CompaniesList extends APIHelper{
         let company = Object.assign({} , companyView)
         return this.api('create' , company )
     }
-    replace(company){
-        return this.api('replace' , Object.assign({} , company))
+    replace(companyView){
+        let company = Object.assign({} , companyView)
+        return this.api('replace' , company)
     }
     remove(company){
+        let list = this.list
+        delete list["company-"+company.id]
+        this.list = list
         return this.api('remove' , company)
     }
     image(company){

@@ -16,7 +16,8 @@ Vue.component("products", {
                 image: []
             },
             productTarget:{},
-            modNew:false
+            modNew:false,
+            show:false
         }
     },
     computed: {
@@ -42,6 +43,15 @@ Vue.component("products", {
                 this.products.update(this.productTarget)
             }
         },
+        remove(product){
+            this.products.remove(product)
+            .then( res => {
+                console.log({res})
+            })
+            .catch( error => {
+                console.log( {error} )
+            })
+        },
         create(){
             this.products.create(this.productTarget)
             .then( response => { 
@@ -56,6 +66,12 @@ Vue.component("products", {
                  this.itemNew = this.itemDefault
                  alert("creado")
              })
+        },
+        reView(){
+            this.view=false
+            setTimeout( ()=> {
+                this.view = true
+            } , 100)
         }
     },
     mounted() {
@@ -63,7 +79,7 @@ Vue.component("products", {
         this.productTarget = Object.assign({} , this.itemDefault)
     },
     template: `
-    <v-row class="pa-2">
+    <v-row class="pa-2" v-if="show">
         <v-col cols="12" xs="6" sm="6" md="3" lg="2" class="mt-3">
             <span 
                 @click="modNew=true"
@@ -89,8 +105,8 @@ Vue.component("products", {
                     >
 
                         <v-card-title class="pa-1" style="background-color:rgba(0,0,0,.6)">
-                            <v-btn dark icon>
-                                <v-icon>mdi-chevron-left</v-icon>
+                            <v-btn dark icon @click="remove(product)">
+                                <v-icon>mdi-close</v-icon>
                             </v-btn>
 
                             <v-spacer></v-spacer>
