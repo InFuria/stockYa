@@ -12,8 +12,8 @@ Vue.component('image-upload', {
       submitFiles(){
         let formData = new FormData();
         console.log("files",this.files[this.cursor])
-        formData.append('image', this.files[this.cursor]);
-        let { url } = API.route('image','create')
+        formData.append('file', this.files[this.cursor]);
+        let { url } = API.route('file','create')
         console.log({url})
         this.cursor++
         axios.post( url , formData, 
@@ -27,7 +27,7 @@ Vue.component('image-upload', {
             }
         })
         .catch( error =>{
-            this.responses.push({error})
+          console.log({error})
           console.log('FAILURE!!');
         });
       },

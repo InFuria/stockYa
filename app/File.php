@@ -1,51 +1,84 @@
 <?php
 
-namespace App;
+namespace App\Http\Controllers\Api;
 
 
-use Illuminate\Database\Eloquent\Model;
-use App\Company;
+use App\Http\Controllers\Controller;
+use App\File;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
-class File extends Model
+class FileController extends Controller
 {
-    public $timestamps = null;
-    protected $table = 'files';
-    protected $hidden = ['pivot'];
-    protected $fillable = ['slug', 'name', 'status' , 'apply'];
+    public function getFile() {
+        try {
+            if ($request = request()->file) {
 
-    public function products(){
-        return $this->belongsToMany(Product::class, 'entities_files')->getPivotColumns();
-    }
-
-    public function companies(){
-        return $this->belongsToMany(Company::class);
-    }
-
-    public static function sync($old, $new, $entity, $origin){
-        if (isset($new)){
-            foreach ($new as $key){
-                $data[$key] = ['origin' => "{$origin}"];
+                $file = File::where('name', $request)->first();
+                return response()->json(["data"=>$file], 200);
             }
-            $entity->files()->sync($data);
-
-            foreach ($new as $key) {
-                $file = File::find($key);
-                $file->apply = 1;
-                $file->save();
-            }
-        }
-
-        if (isset($old)){
-            foreach ($old as $key){
-                $assigned = DB::table('entities_files')->where('file_id', $key)->pluck('id');
-
-                if (!isset($assigned)){
-                $file = File::find($key);
-                $file->apply = 0;
-                $file->save();
-                }
-            }
+            return response()->json(["data"=>"Archivo no valida"], 200);
+        } catch (\Exception $e){
+            Log::error('FileController::store - ' . $e->getMessage());
+            return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);
         }
     }
+
+    public function store () {
+        try{
+            
+                #$imageName = time().'.'.request()->file->getClientOriginalExtension();
+                $imageName = date("ymdhms");
+                FileController::storeDB($imageName);
+                request()->file->move(public_path('/uploadedimages'), $imageName);
+
+            
+            return response()->json(["data"=>"Imagen no valida"], 200);
+        } catch (\Exception $e){
+            Log::error('FileController::store - ' . $e->getMessage());
+            return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);
+        }
+    }
+
+    public function apply(){
+        try{
+
+            //
+
+        } catch (\Exception $e){
+            Log::error('FileController::apply - ' . $e->getMessage());
+            return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);
+        }
+    }
+
+    static public function storeDB($name)
+    {
+        //var_dump($name);
+        DB::beginTransaction();
+        try {
+            $img = File::create([
+                'slug' => urlencode($name),
+                'name' => $name,
+                'status' => 1,
+                'apply' => 0
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Imagen creada',
+                'img' => $img], 201);
+
+        } catch (QueryException $qe){
+            DB::rollBack();
+            Log::error('FileController::storeDB - ' . $qe->getMessage());
+            return response('Ha ocurrido un error al procesar la consulta', 400)->json(['message' => $qe->getMessage()]);
+        } catch (\Exception $e) {
+            DB::rollback();
+            Log::error('FileController::storeDB - ' . $e->getMessage());
+            return response()->json(['error' => true, 'message' => $e->getMessage()], 404);
+        }
+    }
+
 }

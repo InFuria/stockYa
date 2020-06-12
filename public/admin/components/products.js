@@ -39,11 +39,17 @@ Vue.component("products", {
         },
         update() {
             if(this.edit == true){
-                components().update(this.productTarget)
+                this.products.update(this.productTarget)
             }
         },
         create(){
             this.products.create(this.productTarget)
+            .then( response => { 
+                this.modNew = false
+                this.edit = false
+                this.products.push(response.data.company)
+             })
+            .catch( error => console.log({error}) )
         }
     },
     mounted() {

@@ -60,6 +60,10 @@ Vue.component("companies", {
         },
         update(company) {
             this.companies.replace( company )
+            .then( res => {
+                console.log({res})
+            })
+            .catch(error => console.log({error}))
             /*
             let companyNew = Object.assign({}, company)
             companyNew.category_id = Object.queryid(`name=${companyNew.category}` , this.categories.company)
@@ -76,6 +80,12 @@ Vue.component("companies", {
         },
         create(){
             this.companies.create(this.itemNew)
+            .then( response => { 
+                this.companies.push(response.data.company)
+                this.edit= null
+                this.mod= false
+             })
+            .catch( error => console.log({error}) )
         }
     },
     mounted() {

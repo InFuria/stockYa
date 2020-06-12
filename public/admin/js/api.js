@@ -112,6 +112,7 @@ class APIHelper{
     api(action, params){
         params = params == undefined ? {} : this.normalize(params)
         params = this.valid(params)
+        console.log({params})
         let { method , url } = API.route(this.entity , action , params)
         console.log( { method , url } )
         return axios[method]( url , params)
@@ -125,7 +126,7 @@ class APIHelper{
             }
         }
         let { method , url } = API.route(this.entity , 'listPage' , paramsUrl)
-        return axios[method]( url , {})
+        return axios[method]( url , paramsUrl)
         .then(response => {
             this.nextBtn = response.next_page_url
             for(let item of response.data[this.entity]){
