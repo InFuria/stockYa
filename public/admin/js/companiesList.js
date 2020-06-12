@@ -20,8 +20,14 @@ class CompaniesList extends APIHelper{
         this.list = {}
     }
     normalize(company){
+        company.company_id = company.company_id == null ? 0 : parseInt(company.company_id)
         company.city_id = parseInt(company.city_id)
         company.category_id = parseInt(company.category_id)
+        for (let index = 0; index < company.image.length; index++) {
+            if(company.image[index].search("http") > -1){
+                company.image.splice(index , 1)
+            }
+        }
         company.zone = typeof company.zone == 'object' ? String(company.zone.id) : String(company.zone)
         return company
     }
@@ -58,14 +64,10 @@ class CompaniesList extends APIHelper{
     }
     create(companyView){
         let company = Object.assign({} , companyView)
-        this.api('create' , company )
-        .then( response => { 
-            this.push(response.data.company)
-         })
-        .catch( error => console.log({error}) )
+        return this.api('create' , company )
     }
     replace(company){
-        return this.api('replace' , company)
+        return this.api('replace' , Object.assign({} , company))
     }
     remove(company){
         return this.api('remove' , company)

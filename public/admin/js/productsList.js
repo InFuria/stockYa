@@ -41,11 +41,7 @@ class ProductsList extends APIHelper{
     }
     create(productView){
         let product = Object.assign({} , productView)
-        this.api('create' , product )
-        .then( response => { 
-            this.push(response.data.product)
-         })
-        .catch( error => console.log({error}) )
+        return this.api('create' , product )
     }
 }
 
