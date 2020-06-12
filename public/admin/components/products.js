@@ -6,10 +6,10 @@ Vue.component("products", {
             edit: false, mod: false,
             editProduct: null, modProduct: false,
             itemDefault:{
-                name: 'zapatos',
-                description: 'rojos',
-                type: 'normal',
-                price: 102.50,
+                name: '',
+                description: '',
+                type: '',
+                price: 0.0,
                 category_id: 1,
                 company_id: 1,
                 status: 1,
@@ -48,8 +48,14 @@ Vue.component("products", {
                 this.modNew = false
                 this.edit = false
                 this.products.push(response.data.company)
+                this.itemNew = this.itemDefault
+                alert("creado")
+            })
+             .catch( error => {
+                 console.log({error}) 
+                 this.itemNew = this.itemDefault
+                 alert("creado")
              })
-            .catch( error => console.log({error}) )
         }
     },
     mounted() {

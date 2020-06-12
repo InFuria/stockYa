@@ -1,6 +1,5 @@
 <?php
 	$mode =  strrpos($_SERVER['HTTP_HOST'],'dona') > 0 ? 'prod' : 'dev';
-	$mode = "prod";
 ?>
 
 <!DOCTYPE html>

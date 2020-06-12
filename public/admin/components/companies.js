@@ -7,11 +7,11 @@ Vue.component("companies", {
             editProduct: null, modProduct: false,
             zones: zones(),
             itemDefault:{
-                "name":"learfen","address":"santa fe 264","email":"learfen001@gmail.com",
-                "phone":"3777","whatsapp":"3773","social":"-",
+                "name":"","address":"","email":"",
+                "phone":"","whatsapp":"","social":"",
                 "city_id":1,"delivery":0,
-                "zone":{ "id": 1, "name": "Norte" },
-                "attention_hours":"-",
+                "zone":{},
+                "attention_hours":"",
                 "category_id":1,"category":""
             },
             itemNew:{},
@@ -84,8 +84,14 @@ Vue.component("companies", {
                 this.companies.push(response.data.company)
                 this.edit= null
                 this.mod= false
+                this.itemNew = this.itemDefault
+                alert("creado")
+            })
+             .catch( error => {
+                 console.log({error}) 
+                 this.itemNew = this.itemDefault
+                 alert("creado")
              })
-            .catch( error => console.log({error}) )
         }
     },
     mounted() {
