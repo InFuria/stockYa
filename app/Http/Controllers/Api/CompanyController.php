@@ -84,10 +84,11 @@ class CompanyController extends Controller
     }
 
     public function update(Request $request, Company $company){
+        $all = $request->all();
         try {
-
-            // temporal
-            /*$request->validate([
+            /*
+            $request->validate([
+                'id' => 'integer',
                 'name' => 'string',
                 'address' => 'string',
                 'email' => 'string',
@@ -102,12 +103,12 @@ class CompanyController extends Controller
                 'status' => 'integer',
                 'attention_hours' => 'string',
                 'category_id' => 'integer',
-                'company_id' => 'nullable|integer',
+                'company_id' => 'integer',
                 'visits' => 'integer'
-            ]);*/
-
+            ]);
+            */
             $request = $request->all();
-            $request['slug'] = urlencode($request['name']);
+            $request['slug'] = "+".urlencode($request['name']);
 
             $company->update($request);
 
@@ -117,15 +118,20 @@ class CompanyController extends Controller
 
             return response()->json([
                 'message' => 'La compañia se ha actualizado!',
-                'company' => $company->attributesToArray()], 200);
+                'company' => $company->attributesToArray(),
+                'all' => $all
+            ], 200);
 
         } catch (QueryException $qe) {
             DB::rollBack();
             Log::error('CompanyController::update - ' . $qe->getMessage());
-            return response()->json(['origin' => 'CompanyController::update', 'message' => $qe->getMessage()], 400);
+            return response()->json(['origin' => 'CompanyController::update > db', 'message' => $qe->getMessage()], 400);
         } catch (\Exception $e){
             Log::error('CompanyController::update - ' . $e->getMessage());
-            return response()->json(['origin' => 'CompanyController::update', 'message' => $e->getMessage()], 400);
+            return response()->json([
+                'origin' => 'CompanyController::update > invalid',
+                'message' => $e->getMessage(),
+                ], 400);
         }
     }
 
