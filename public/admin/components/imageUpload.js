@@ -20,6 +20,7 @@ Vue.component('image-upload', {
         axios.post( url , formData, 
             { headers: { 'Content-Type': 'multipart/form-data'}}
         ).then(response =>{
+          console.log({response})
             this.item.image.push(response.data.id)
             if(this.cursor < this.files.length){
                 this.submitFiles()
@@ -39,6 +40,9 @@ Vue.component('image-upload', {
         this.images.image.slice(i , 1)
         this.$emit('update' , images)
       }
+    },
+    mounted(){
+      console.log(this.images)
     },
     template:`
         <div class="container">

@@ -23,11 +23,11 @@ class CompaniesList extends APIHelper{
         company.company_id = company.company_id == null ? 0 : parseInt(company.company_id)
         company.city_id = parseInt(company.city_id)
         company.category_id = parseInt(company.category_id)
-        company.image = company.image == undefined ? [] : company.image
+        company.image = company.image == undefined || !Array.isArray(company.image) ? [] : company.image
         if(company.image.length > 0){
             for (let index = 0; index < company.image.length; index++) {
                 console.log(company.image[index])
-                if(company.image[index].search("http") > -1){
+                if( Number.isNaN(parseInt(company.image[index])) ){
                     company.image.splice(index , 1)
                 }
             }
