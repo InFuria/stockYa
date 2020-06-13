@@ -1,6 +1,7 @@
 Vue.component("companies", {
     data() {
         return {
+            dominio:API.dominio(),
             companies: companies(),
             categories: categories(),
             edit: null, mod: false,
@@ -316,7 +317,7 @@ Vue.component("companies", {
 
 
                 <v-img
-                    :src="API.dominio+'files/'+company.image[0]"
+                    :src="dominio+'files/'+company.image[0]"
                     height="240px" dark
                 >
                     <div
