@@ -37,10 +37,15 @@ Vue.component("products", {
                 this.productTarget = product
                 this.edit = true
             }else{
-                this.productTarget = Object.assign({} , this.itemDefault)
+                this.resetFieldText()
             }
             this.modNew = true
         },
+        resetFieldText(){
+            for(let a of Object.keys(this.itemDefault)){
+                this.productTarget[a] = this.itemDefault[a]
+            }
+        }
         image(imageSrc){
             let image = typeof imageSrc == 'object' ? imageSrc.id : imageSrc 
             if(Number.isNaN(parseInt(image))){
@@ -82,7 +87,7 @@ Vue.component("products", {
                 this.modNew = false
                 this.edit = false
                 this.products.push(response.data.product)
-                this.productTarget = Object.assign({} , this.itemDefault)
+                this.resetFieldText()
                 this.reView()
             })
             .catch( error => {
@@ -98,7 +103,7 @@ Vue.component("products", {
     },
     mounted() {
         this.categories = categories()
-        this.productTarget = Object.assign({} , this.itemDefault)
+        this.resetFieldText()
     },
     template: `
     <v-row class="pa-2" v-if="view">
