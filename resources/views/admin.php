@@ -1,6 +1,5 @@
 <?php
 	$mode =  strrpos($_SERVER['HTTP_HOST'],'dona') > 0 ? 'prod' : 'dev';
-	$mode = "prod";
 ?>
 
 <!DOCTYPE html>
@@ -64,7 +63,10 @@
 						<v-tab-item>
 							<v-card flat>
 							<v-card-text>
-								<h2>content web</h2>
+								<h2 class="my-5">Sobre web</h2>
+								<v-divider></v-divider>
+								<h3 class="mt-5 mb-2">Categorias</h3>
+								<categories-post></categories-post>
 							</v-card-text>
 							</v-card>
 						</v-tab-item>
@@ -95,7 +97,7 @@
 
 		<script src="./assets/vue/vue-resource.min.js"></script>
 		<script src="./assets/vue/vue.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+		<script src="./assets/vue/vuetify.min.js"></script>
 
 		<link href="./assets/css/materialdesignicons.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons">
@@ -133,10 +135,12 @@
 	</script>
 
 	<script src="./admin/js/api.js"></script>
+	<script src="./admin/js/categoriesList.js"></script>
 	<script src="./admin/js/companiesList.js"></script>
 	<script src="./admin/js/productsList.js"></script>
 	<script src="./admin/js/objects.js"></script>
 	<script src="./admin/components/next.js"></script>
+	<script src="./admin/components/categories.js"></script>
 	<script src="./admin/components/imageUpload.js"></script>
 	<script src="./admin/components/companies.js?d=<?php echo date("h:m:s")?>"></script>
 	<script src="./admin/components/products.js?d=<?php echo date("h:m:s")?>"></script>
