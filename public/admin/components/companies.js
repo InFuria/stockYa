@@ -316,7 +316,7 @@ Vue.component("companies", {
 
 
                 <v-img
-                    :src="company.image[0]"
+                    :src="API.dominio+'files/'+company.image[0]"
                     height="240px" dark
                 >
                     <div
