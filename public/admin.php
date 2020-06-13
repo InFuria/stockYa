@@ -94,7 +94,7 @@
 
 		<script src="./assets/vue/vue-resource.min.js"></script>
 		<script src="./assets/vue/vue.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+		<script src="./assets/vue/vuetify.min.js"></script>
 
 		<link href="./assets/css/materialdesignicons.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons">

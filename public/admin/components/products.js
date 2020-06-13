@@ -1,7 +1,6 @@
 Vue.component("products", {
     data() {
         return {
-            dominio:API.dominio(),
             products: products(),
             categories: categories(),
             edit: false, mod: false,
@@ -17,8 +16,9 @@ Vue.component("products", {
                 image: []
             },
             productTarget:{},
+            types:["Normal","Combo","Oferta","Descuentos","Usado"],
             modNew:false,
-            show:false
+            view:true
         }
     },
     computed: {
@@ -28,26 +28,48 @@ Vue.component("products", {
                 res.push(category.name)
             }
             return res
-        }
+        },
     },
     methods: {
         toggle(product) {
             this.edit = false
             if(product != null){
-                this.productTarget == product
+                this.productTarget = product
                 this.edit = true
+            }else{
+                this.productTarget = Object.assign({} , this.itemDefault)
             }
             this.modNew = true
         },
+        image(imageSrc){
+            let image = typeof imageSrc == 'object' ? imageSrc.id : imageSrc 
+            if(Number.isNaN(parseInt(image))){
+              return image
+            }
+            return API.route('file','open',{id:image}).url
+        },
+        categoryId(name){
+            for (let category of this.categories.product) {
+                if(category.name == name){
+                    return category.id
+                }
+            }
+        },
         update() {
             if(this.edit == true){
-                this.products.update(this.productTarget)
+                this.products.replace(this.productTarget)
+                .then( res => {
+                    console.log('replace', {res})
+                })
+                .catch(error => {
+                    console.log({error})
+                })
             }
         },
         remove(product){
             this.products.remove(product)
             .then( res => {
-                console.log({res})
+                this.reView()
             })
             .catch( error => {
                 console.log( {error} )
@@ -56,17 +78,16 @@ Vue.component("products", {
         create(){
             this.products.create(this.productTarget)
             .then( response => { 
+                console.log({response})
                 this.modNew = false
                 this.edit = false
-                this.products.push(response.data.company)
-                this.itemNew = this.itemDefault
-                alert("creado")
+                this.products.push(response.data.product)
+                this.productTarget = Object.assign({} , this.itemDefault)
+                this.reView()
             })
-             .catch( error => {
-                 console.log({error}) 
-                 this.itemNew = this.itemDefault
-                 alert("creado")
-             })
+            .catch( error => {
+                console.log({error})
+            })
         },
         reView(){
             this.view=false
@@ -80,7 +101,7 @@ Vue.component("products", {
         this.productTarget = Object.assign({} , this.itemDefault)
     },
     template: `
-    <v-row class="pa-2" v-if="show">
+    <v-row class="pa-2" v-if="view">
         <v-col cols="12" xs="6" sm="6" md="3" lg="2" class="mt-3">
             <span 
                 @click="modNew=true"
@@ -97,7 +118,7 @@ Vue.component("products", {
                 class="mx-auto"
             >
                 <v-img
-                    :src="dominio+'files/'+product.image[0]"
+                    :src="image(product.image[0])"
                     height="240px" dark
                 >
                     <div 
@@ -183,6 +204,24 @@ Vue.component("products", {
                             <v-list-item-title >
                                 <v-select
                                     @change="update"
+                                    label="Tipo"
+                                    :items="types"
+                                    v-model="productTarget.type"
+                                ></v-select>
+                            </v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-divider inset>
+                    </v-divider>
+                    <v-list-item>
+                        <v-list-item-icon>
+                            <v-icon color="indigo">mdi-tag</v-icon>
+                        </v-list-item-icon>
+
+                        <v-list-item-content>
+                            <v-list-item-title >
+                                <v-select
+                                    @change="update"
                                     label="Categoria"
                                     :items="categoriesProduct"
                                     v-model="productTarget.category"
@@ -191,27 +230,26 @@ Vue.component("products", {
                         </v-list-item-content>
                     </v-list-item>
                     <v-divider inset>
-                    
                     </v-divider>
 
-                            <v-list-item>
-                                <v-list-item-icon>
-                                    <v-icon color="indigo">mdi-details</v-icon>
-                                </v-list-item-icon>
-                                <v-list-item-content>
-                                    <v-list-item-title >
-                                        <v-textarea
-                                            @change="update"
-                                            label="Descripción"
-                                            v-model="productTarget.description"
-                                        ></v-textarea>
-                                    </v-list-item-title>
-                                </v-list-item-content>
-                            </v-list-item>
+                    <v-list-item>
+                        <v-list-item-icon>
+                            <v-icon color="indigo">mdi-details</v-icon>
+                        </v-list-item-icon>
+                        <v-list-item-content>
+                            <v-list-item-title >
+                                <v-textarea
+                                    @change="update"
+                                    label="Descripción"
+                                    v-model="productTarget.description"
+                                ></v-textarea>
+                            </v-list-item-title>
+                        </v-list-item-content>
+                    </v-list-item>
 
                 </v-list>
                 <v-divider></v-divider>
-                <div class="pa-5 mx-5"><image-upload @update="update" :images="productTarget"></image-upload></div>
+                <div class="pa-5 mx-5" v-if="edit"><image-upload @update="update" :images="productTarget"></image-upload></div>
                 <v-btn v-if="!edit" @click="create" class="blue white--text ma-5" >Crear <v-icon>mdi-check</v-icon></v-btn>
             </v-card>
         </v-dialog>

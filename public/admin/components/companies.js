@@ -1,7 +1,6 @@
 Vue.component("companies", {
     data() {
         return {
-            dominio:API.dominio(),
             companies: companies(),
             categories: categories(),
             edit: null, mod: false,
@@ -30,6 +29,12 @@ Vue.component("companies", {
         }
     },
     methods: {
+        image(image){
+            if(Number.isNaN(parseInt(image))){
+              return image
+            }
+            return API.route('file','open',{id:image}).url
+        },
         toggle(company) {
             if (company == this.edit) {
                 this.mod = false
@@ -317,7 +322,7 @@ Vue.component("companies", {
 
 
                 <v-img
-                    :src="dominio+'files/'+company.image[0]"
+                    :src="image(company.image[0])"
                     height="240px" dark
                 >
                     <div

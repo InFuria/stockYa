@@ -28,7 +28,10 @@ class API{
                 status:{method:'post',url:'products/<id>/status'},
                 imageDefault:{url:'https://www.mageplaza.com/assets/img/extensions/product-labels.png'}
             },
-			file:{create:{method:'post',url:'files'}},
+			file:{
+                create:{method:'post',url:'files'},
+                open:{method:'get',url:'files/<id>'}
+            },
 		}
     }
     static route(entity , action , data){
