@@ -52,7 +52,7 @@ class CompanyCategoryController extends Controller
 
             $category = DB::table('company_categories')->where('id', $category)->update(request()->all());
 
-            return response()->json('Se han actualizado los datos!', 200);
+            return response()->json(['category' => $category, 'mge'=> 'Se han actualizado los datos!'], 200);
 
         } catch (\Exception $e){
             Log::error('CompanyCategoryController::update - ' . $e->getMessage());
