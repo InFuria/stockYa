@@ -51,3 +51,13 @@ Object["queryid"] = (query , array) => {
     }
     return null
 }
+
+Array["sortObject"] = (array , key)=>{
+    array.sort(function (o1,o2) {
+        //comparación lexicogŕafica
+        if (o1[key] > o2[key]) { return 1; } 
+        else if (o1[key] < o2[key]) { return -1; } 
+        return 0;
+    })
+    return array
+}

@@ -8,7 +8,7 @@ var dataVue = new Object({
 		color:{primary:"orange darken-4"},
 		companies:new CompaniesList,
 		products:new ProductsList,
-		categories:{product:[],company:[]},
+		categories:new CategoriesList,
 		zones:[
 			{ id: 1, name: "Norte" },
 			{ id: 2, name: "Sur" },
@@ -66,7 +66,7 @@ function vueLaunch() {
 		methods: {
 			authValid(){
 				this.sections = ['Web', 'Comercios']
-				API.categories( {
+				categories().getter( {
 					company(){
 						companies().getterInstance()
 					}

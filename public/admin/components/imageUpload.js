@@ -3,11 +3,11 @@ Vue.component('image-upload', {
     props:["images"],
     data(){
       return {
-        dominio:API.dominio(),
         files: '',
         cursor:0,
         responses:[],
-        item:this.images
+        item:this.images,
+        view:true
       }
     },
     methods: {
@@ -20,13 +20,17 @@ Vue.component('image-upload', {
         axios.post( url , formData, 
             { headers: { 'Content-Type': 'multipart/form-data'}}
         ).then(response =>{
-          console.log({response})
+            console.log({response})
             this.item.image.push(response.data.id)
             if(this.cursor < this.files.length){
                 this.submitFiles()
             }else{
                 this.$emit('update' , this.item)
             }
+            this.view = false
+            setInterval( () => {
+              this.view = true
+            }, 100)
         })
         .catch( error =>{
           console.log({error})
@@ -38,8 +42,14 @@ Vue.component('image-upload', {
       },
       remove(i){
         this.images.image.slice(i , 1)
-        this.$emit('update' , images)
-      }
+        this.$emit('update' , this.images)
+      },
+      image(image){
+          if(Number.isNaN(parseInt(image))){
+            return image
+          }
+          return API.route('file','open',{id:image}).url
+      },
     },
     mounted(){
       console.log(this.images)
@@ -54,9 +64,9 @@ Vue.component('image-upload', {
             </div>
 
             <v-row>
-              <v-col class="col" cols="3" v-for="(image , index) of images.image">
-                  <v-img :src="dominio+'files/'+image"></v-img>
-                  <v-btn @click="remove(index)" class="ml-2" style="background-color:rgba(255,255,255,.75);position:absolute;margin-top:-4rem" text color="red">Eliminar</v-btn>
+              <v-col v-if="view" class="col" cols="3" v-for="imageId of images.image">
+                  <v-img style="max-height:180px" :src="image(imageId)"></v-img>
+                  <v-btn @click="remove(images.image.indexOf(imageId))" class="ml-2" style="background-color:rgba(255,255,255,.75);position:absolute;margin-top:-4rem" text color="red">Eliminar</v-btn>
               </v-col>
           </v-row>
         </div>
