@@ -15,10 +15,10 @@ class FileController extends Controller
         try {
             if ($request = request()->file) {
 
-                $file = File::where('name', $request)->first();
+                $file = File::where('id', $request)->first();
                 return response()->json(["data"=>$file], 200);
             }
-            return response()->json(["data"=>"Archivo no valida"], 200);
+            return response()->file(public_path('/uploadedimages') , $file->name);
         } catch (\Exception $e){
             Log::error('FileController::store - ' . $e->getMessage());
             return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);

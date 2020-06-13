@@ -96,7 +96,7 @@ Vue.component("products", {
                 class="mx-auto"
             >
                 <v-img
-                    :src="product.image[0]"
+                    :src="API.dominio()+'files/'+product.image[0]"
                     height="240px" dark
                 >
                     <div 

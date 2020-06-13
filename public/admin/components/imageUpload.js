@@ -15,7 +15,6 @@ Vue.component('image-upload', {
         console.log("files",this.files[this.cursor])
         formData.append('file', this.files[this.cursor]);
         let { url } = API.route('file','create')
-        console.log({url})
         this.cursor++
         axios.post( url , formData, 
             { headers: { 'Content-Type': 'multipart/form-data'}}
@@ -51,7 +50,7 @@ Vue.component('image-upload', {
 
             <v-row>
               <v-col class="col" cols="3" v-for="(image , index) of images.image">
-                  <v-img :src="image"></v-img>
+                  <v-img :src="API.dominio()+'files/'+image"></v-img>
                   <v-btn @click="remove(index)" class="ml-2" style="background-color:rgba(255,255,255,.75);position:absolute;margin-top:-4rem" text color="red">Eliminar</v-btn>
               </v-col>
           </v-row>
