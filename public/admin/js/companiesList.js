@@ -23,10 +23,12 @@ class CompaniesList extends APIHelper{
         company.company_id = company.company_id == null ? 0 : parseInt(company.company_id)
         company.city_id = parseInt(company.city_id)
         company.category_id = parseInt(company.category_id)
-        company.image = company.image == undefined ? [] : company.image
-        for (let index = 0; index < company.image.length; index++) {
-            if(company.image[index].search("http") > -1){
-                company.image.splice(index , 1)
+        company.image = company.image == undefined || !Array.isArray(company.image) ? [] : company.image
+        if(company.image.length > 0){
+            for (let index = 0; index < company.image.length; index++) {
+                if( Number.isNaN(parseInt(company.image[index])) ){
+                    company.image.splice(index , 1)
+                }
             }
         }
         company.zone = typeof company.zone == 'object' ? String(company.zone.id) : String(company.zone)
@@ -37,6 +39,11 @@ class CompaniesList extends APIHelper{
         this.list = null
         list['company-'+company.id] = company
         company.zone = company.zone == null ? 1 : company.zone
+        let images = []
+        for(let image of company.image){
+            images.push( ( typeof image == 'object' ? image.id : image ) )
+        }
+        company.image = images
         this.list = list
     }
     getter(){
@@ -49,10 +56,6 @@ class CompaniesList extends APIHelper{
             for( let company of response.data.data ){
                 if(company.image.length == 0){
                     company.image = [API.route('company','imageDefault').url]
-                }else{
-                    for(let a of company.image){
-                        a = './uploadedimages/'+a+'.jpg'
-                    }
                 }
                 company['ui'] = {view:true}
                 company.zone = typeof company.zone == "string" ? 1 : company.zone
@@ -68,7 +71,7 @@ class CompaniesList extends APIHelper{
         let company = Object.assign({} , companyView)
         return this.api('create' , company )
     }
-    replace(companyView){
+    replace(companyView){ 
         let company = Object.assign({} , companyView)
         return this.api('replace' , company)
     }

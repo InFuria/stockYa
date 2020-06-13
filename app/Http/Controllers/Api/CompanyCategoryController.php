@@ -11,7 +11,7 @@ class CompanyCategoryController extends Controller
     public function getCategories(){
         try {
 
-            $categories = DB::table('company_categories')->paginate(15);
+            $categories = DB::table('company_categories')->paginate(40);
 
             return response()->json($categories, 200);
 
@@ -37,9 +37,9 @@ class CompanyCategoryController extends Controller
     public function store(){
         try {
             $request = request()->all();
-            $category = DB::table('company_categories')->insert($request);
+            $category = DB::table('company_categories')->insertGetId($request);
 
-            return response()->json('Se han registrado los datos!', 200);
+            return response()->json(['category' => $category,'mge'=>'Se han registrado los datos!'], 200);
 
         } catch (\Exception $e){
             Log::error('CompanyCategoryController::store - ' . $e->getMessage());

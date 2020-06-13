@@ -13,9 +13,9 @@ class FileController extends Controller
 {
     public function getFile($file) {
         try {
-            if ($request = request()->file) {
+            if (isset($file)) {
 
-                $file = File::where('id', $request)->first();
+                $file = File::where('id', $file)->first();
 
                 return response()->file(public_path('/uploadedimages/') . $file->name);
             }
