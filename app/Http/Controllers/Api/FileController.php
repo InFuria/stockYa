@@ -11,14 +11,17 @@ use Illuminate\Support\Facades\Log;
 
 class FileController extends Controller
 {
-    public function getFile() {
+    public function getFile($file) {
         try {
             if ($request = request()->file) {
 
-                $file = File::where('name', $request)->first();
-                return response()->json(["data"=>$file], 200);
+                $file = File::where('id', $request)->first();
+
+                return response()->file(public_path('/uploadedimages/') . $file->name);
             }
-            return response()->json(["data"=>"Archivo no valida"], 200);
+
+            return response()->json(["message"=>"Archivo no encontrado"], 200);
+
         } catch (\Exception $e){
             Log::error('FileController::store - ' . $e->getMessage());
             return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);
