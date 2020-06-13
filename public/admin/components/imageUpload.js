@@ -3,6 +3,7 @@ Vue.component('image-upload', {
     props:["images"],
     data(){
       return {
+        dominio:API.dominio(),
         files: '',
         cursor:0,
         responses:[],
@@ -50,7 +51,7 @@ Vue.component('image-upload', {
 
             <v-row>
               <v-col class="col" cols="3" v-for="(image , index) of images.image">
-                  <v-img :src="API.dominio()+'files/'+image"></v-img>
+                  <v-img :src="dominio+'files/'+image"></v-img>
                   <v-btn @click="remove(index)" class="ml-2" style="background-color:rgba(255,255,255,.75);position:absolute;margin-top:-4rem" text color="red">Eliminar</v-btn>
               </v-col>
           </v-row>

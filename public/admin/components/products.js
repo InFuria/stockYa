@@ -1,6 +1,7 @@
 Vue.component("products", {
     data() {
         return {
+            dominio:API.dominio(),
             products: products(),
             categories: categories(),
             edit: false, mod: false,
@@ -96,7 +97,7 @@ Vue.component("products", {
                 class="mx-auto"
             >
                 <v-img
-                    :src="API.dominio()+'files/'+product.image[0]"
+                    :src="dominio+'files/'+product.image[0]"
                     height="240px" dark
                 >
                     <div 
