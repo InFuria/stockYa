@@ -228,6 +228,23 @@ Vue.component("companies", {
                             </v-list-item>
 
                             <v-divider inset></v-divider>
+        
+                            <v-list-item>
+                                <v-list-item-icon>
+                                    <v-icon color="indigo">mdi-email</v-icon>
+                                </v-list-item-icon>
+        
+                                <v-list-item-content>
+                                    <v-list-item-title>
+                                        <v-text-field
+                                            label="Social"
+                                            v-model="itemNew.social"
+                                        ></v-text-field>
+                                    </v-list-item-title>
+                                </v-list-item-content>
+                            </v-list-item>
+
+                            <v-divider inset></v-divider>
 
                             <v-list-item>
                                 <v-list-item-icon>

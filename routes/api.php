@@ -81,7 +81,7 @@ Route::post('companies/{company}/visit', 'Api\CompanyController@visits');
     });
 
     /** FILES */
-    Route::get('files/{id}', 'Api\FileController@getFile');
+    Route::get('files/{file}', 'Api\FileController@getFile');
     Route::post('files', 'Api\FileController@store');
     Route::get('files/apply', 'Api\FileController@apply');
 #});
