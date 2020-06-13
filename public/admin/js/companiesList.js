@@ -24,9 +24,12 @@ class CompaniesList extends APIHelper{
         company.city_id = parseInt(company.city_id)
         company.category_id = parseInt(company.category_id)
         company.image = company.image == undefined ? [] : company.image
-        for (let index = 0; index < company.image.length; index++) {
-            if(company.image[index].search("http") > -1){
-                company.image.splice(index , 1)
+        if(company.image.length > 0){
+            for (let index = 0; index < company.image.length; index++) {
+                console.log(company.image[index])
+                if(company.image[index].search("http") > -1){
+                    company.image.splice(index , 1)
+                }
             }
         }
         company.zone = typeof company.zone == 'object' ? String(company.zone.id) : String(company.zone)
