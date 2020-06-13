@@ -37,9 +37,9 @@ class ProductCategoryController extends Controller
     public function store(){
         try {
             $request = request()->all();
-            $category = DB::table('products_categories')->insert($request);
+            $category = DB::table('products_categories')->insertGetId($request);
 
-            return response()->json('Se han registrado los datos!', 200);
+            return response()->json(['category' => $category,'mge'=>'Se han registrado los datos!'], 200);
 
         } catch (\Exception $e){
             Log::error('ProductCategoryController::store - ' . $e->getMessage());
@@ -52,7 +52,7 @@ class ProductCategoryController extends Controller
 
             $category = DB::table('products_categories')->where('id', $category)->update(request()->all());
 
-            return response()->json('Se han actualizado los datos!', 200);
+            return response()->json(['category' => $category,'mge'=>'Se han actualizado los datos!'], 200);
 
         } catch (\Exception $e){
             Log::error('ProductCategoryController::update - ' . $e->getMessage());
