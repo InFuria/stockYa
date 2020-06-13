@@ -28,6 +28,10 @@ class API{
                 status:{method:'post',url:'products/<id>/status'},
                 imageDefault:{url:'https://www.mageplaza.com/assets/img/extensions/product-labels.png'}
             },
+            categories:{
+                create:{method:'post',url:'categories/<is>'},
+                list:{method:'get',url:'categories/<is>'},
+            },
 			file:{
                 create:{method:'post',url:'files'},
                 open:{method:'get',url:'files/<id>'}
@@ -47,7 +51,8 @@ class API{
     static categories( call_back ){
         API.getter('categories/products')
         .then((response)=>{
-            for( let category of response.data.data ){
+            let res = Array.sortObject(response.data.data , 'name')
+            for( let category of res ){
                 categories().product.push(category)
             }
             if(call_back.products != undefined){
@@ -60,7 +65,8 @@ class API{
 
         API.getter('categories/company')
         .then((response)=>{
-            for( let category of response.data.data ){
+            let res = Array.sortObject(response.data.data , 'name')
+            for( let category of res ){
                 categories().company.push(category)
             }
             if(call_back.company != undefined){
@@ -111,11 +117,13 @@ class APIHelper{
         }
         return item
     }
-    api(action, params){
+    api(action, params, paramsUrl){
         params = params == undefined ? {} : this.normalize(params)
         params = this.valid(params)
-        let { method , url } = API.route(this.entity , action , params)
+        paramsUrl = paramsUrl == undefined ? params : paramsUrl
+        let { method , url } = API.route(this.entity , action , paramsUrl)
         delete params.id
+        console.log(url)
         return axios[method]( url , params)
     }
     next(params){
