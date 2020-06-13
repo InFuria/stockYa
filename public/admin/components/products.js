@@ -33,19 +33,14 @@ Vue.component("products", {
     methods: {
         toggle(product) {
             this.edit = false
-            if(product != null){
+            if(product != null && product != undefined){
                 this.productTarget = product
                 this.edit = true
             }else{
-                this.resetFieldText()
+                this.productTarget = Object.assign({} , this.itemDefault)
             }
             this.modNew = true
         },
-        resetFieldText(){
-            for(let a of Object.keys(this.itemDefault)){
-                this.productTarget[a] = this.itemDefault[a]
-            }
-        }
         image(imageSrc){
             let image = typeof imageSrc == 'object' ? imageSrc.id : imageSrc 
             if(Number.isNaN(parseInt(image))){
@@ -87,7 +82,7 @@ Vue.component("products", {
                 this.modNew = false
                 this.edit = false
                 this.products.push(response.data.product)
-                this.resetFieldText()
+                this.productTarget = Object.assign({} , this.itemDefault)
                 this.reView()
             })
             .catch( error => {
@@ -103,13 +98,13 @@ Vue.component("products", {
     },
     mounted() {
         this.categories = categories()
-        this.resetFieldText()
+        this.productTarget = Object.assign({} , this.itemDefault)
     },
     template: `
     <v-row class="pa-2" v-if="view">
         <v-col cols="12" xs="6" sm="6" md="3" lg="2" class="mt-3">
             <span 
-                @click="modNew=true"
+                @click="toggle"
                 class="mx-2 pa-3 elevation-2 d-flex justify-center align-center"
                 style="font-size:8rem;"
             >+</span>
