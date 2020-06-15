@@ -25,9 +25,9 @@ class WebSaleRequest extends FormRequest
     {
         return [
             'company_id' => 'required|integer',
-            'client_id' => 'required|integer',
             'payment_id' => 'required|integer',
             'status' => 'integer',
+            'total' => 'numeric',
             'tags' => 'string',
             'text' => 'string'
         ];

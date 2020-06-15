@@ -27,7 +27,7 @@ class ProductController extends Controller
     public function index()
     {
 
-        /*$cities = \DB::table('cities')->insert(
+        $cities = \DB::table('cities')->insert(
             ['name' => 'Goya']
         );
 
@@ -38,6 +38,24 @@ class ProductController extends Controller
         $units = \DB::table('units')->insert(
             ['name' => 'gr']
         );
+
+        $cat1 = \DB::table('company_categories')->insert(
+            ['name' => 'cat 1']
+        );
+
+        $cat2 = \DB::table('products_categories')->insert(
+            ['name' => 'cat 1']
+        );
+
+        factory(User::class, 50)->create();
+
+        factory(Company::class, 5)->create();
+        factory(ProductCategory::class, 50)->create();
+        factory(Product::class, 50)->create();
+
+        factory(WebSale::class, 20)->create();
+        factory(WebSaleDetail::class, 15)->create();
+        factory(WebSaleRecord::class, 15)->create();
 
         $user = new User();
         $user->dni = 12345678;
@@ -50,7 +68,7 @@ class ProductController extends Controller
         $user->password = Hash::make('undertale');
         $user->save();
 
-        $user->createToken('Personal Admin Token', ['*'])->accessToken;
+        $user->createToken('Personal Admin Token')->accessToken;
 
         $user = new User();
         $user->dni = 123456789;
@@ -63,22 +81,26 @@ class ProductController extends Controller
         $user->password = Hash::make('undertale');
         $user->save();
 
-        $user->createToken('Personal Admin Token', ['*'])->accessToken;*/
-
-        factory(User::class, 50)->create();
-
-        factory(Company::class, 5)->create();
-        factory(ProductCategory::class, 50)->create();
-        factory(Product::class, 50)->create();
-
-        factory(WebSale::class, 20)->create();
-        factory(WebSaleDetail::class, 15)->create();
-        factory(WebSaleRecord::class, 15)->create();
+        $user->createToken('Personal Admin Token')->accessToken;
     }
 
     public function getProducts()
     {
         try {
+
+            if ($request = request()->get('data')){
+
+                $products = Product::with('image:files.id,files.name')
+                    ->where('status', '1')->whereRaw("name like '%$request%' OR description like '%{$request}%'")
+                    ->orderByDesc('id')->get();
+
+                $companies = Company::with('image:files.id,files.name')
+                    ->where('status', '1')
+                    ->whereRaw("name like '%$request%'")->orderByDesc('id')->get();
+
+                return response()->json([
+                    'data' => ['products' => $products, 'companies' => $companies]],200);
+            }
 
             if ($request = request()->get('company_id')) {
 

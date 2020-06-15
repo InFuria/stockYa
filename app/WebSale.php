@@ -9,7 +9,7 @@ class WebSale extends Model
 {
     protected $table = 'web_sales';
 
-    protected $fillable = ['company_id', 'client_id', 'payment_id', 'status', 'tags', 'text'];
+    protected $fillable = ['company_id', 'client_id', 'payment_id', 'status', 'total', 'tracker', 'tags', 'text'];
 
     protected static function boot()
     {
@@ -17,6 +17,7 @@ class WebSale extends Model
 
         static::creating(function ($query) {
             $query->status = 0; // 0 => pendiente, 1 => completado, 2 => cancelado, 3 => en revision
+            $query->client_id = request()->user()->id;
             $query->tracker = Str::random();
         });
     }
