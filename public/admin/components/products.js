@@ -16,7 +16,7 @@ Vue.component("products", {
                 image: []
             },
             productTarget:{},
-            types:["Normal","Combo","Oferta","Descuentos","Usado"],
+            types:["-","Normal","Combo","Oferta","Descuentos","Usado"],
             modNew:false,
             view:true
         }
@@ -33,10 +33,14 @@ Vue.component("products", {
     methods: {
         toggle(product) {
             this.edit = false
-            if(product != null && product != undefined){
-                this.productTarget = product
-                this.edit = true
+            if(product != undefined){
+                if(product != null ){
+                    this.productTarget = product
+                    this.edit = true
+                }
             }else{
+                console.log("new")
+                this.edit = false
                 this.productTarget = Object.assign({} , this.itemDefault)
             }
             this.modNew = true
