@@ -42,6 +42,7 @@ class AuthController extends Controller
             ]);
 
             $user->save();
+            $user->roles()->sync([2]);
             DB::commit();
 
             $oClient = OClient::where('password_client', 1)->first();
@@ -70,7 +71,7 @@ class AuthController extends Controller
                 $user = Auth::user();
                 $oClient = OClient::where('password_client', 1)->first();
 
-                $auth = Gate::inspect('isAdmin', request()->user())->allowed();
+                $auth = request()->user()->inRole('admin');
 
                 $type = $auth == true ? 'personal' : '';
 

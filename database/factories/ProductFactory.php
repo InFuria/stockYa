@@ -12,8 +12,8 @@ $factory->define(Product::class, function (Faker $faker) {
         'description' => $faker->text,
         'type' => 'promo',
         'price' => $faker->randomNumber(),
-        'category_id' => $faker->numberBetween(1, 50),
-        'company_id' => $faker->numberBetween(1, 25),
+        'category_id' => $faker->numberBetween(1, 7),
+        'company_id' => $faker->numberBetween(1, 5),
         'score' => $faker->randomFloat(2,0,5),
         'score_count' => $faker->numberBetween(1,15),
         'status' => $faker->boolean

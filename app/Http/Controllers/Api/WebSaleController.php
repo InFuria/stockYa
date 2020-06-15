@@ -7,9 +7,9 @@ use App\Http\Requests\WebSaleRequest;
 use App\WebSale;
 use App\WebSaleDetail;
 use App\WebSaleRecord;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class WebSaleController extends Controller
 {
@@ -36,7 +36,7 @@ class WebSaleController extends Controller
             $record = new WebSaleRecord();
             $record->transaction_id = $websale->id;
             $record->user_id = $websale->client_id;
-            $record->status = 0;
+            $record->status = 0;// 0 => created, 1 => updated, 2 => deleted
             $record->saveOrFail();
 
             DB::commit();
@@ -45,22 +45,64 @@ class WebSaleController extends Controller
 
             return response()->json([
                 'message' => 'El pedido se ha registrado exitosamente!',
-                'order' => $websale->attributesToArray()
+                'data' => $websale->attributesToArray()
             ],200);
 
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('WebSaleController::store - ' . $e->getMessage());
-            return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);
+            return response()->json(['origin' => 'WebSaleController::store', 'message' => $e->getMessage()], 400);
         }
     }
 
-    public function update(){
+    public function update(Request $request, WebSale $websale){
+        DB::beginTransaction();
         try {
 
-            //
+            $user = request()->user();
+            if (!$user->isOwner($websale) && !$user->isAdmin())
+                return response()->json(['message' => 'No posee permisos para acceder a este registro'],403);
+
+            $request = $request->validate([
+                'company_id' => 'integer',
+                'payment_id' => 'integer',
+                'client_id' => 'integer',
+                'status' => 'integer',
+                'total' => 'numeric',
+                'tags' => 'string',
+                'text' => 'string'
+            ]);
+            $websale->update([$request]);
+
+            if ($sale_detail = request()->get('details')){
+                $websale->web_sale_details()->delete();
+                foreach ($sale_detail as $detail){
+                    $details = new WebSaleDetail();
+                    $details->web_sale_id = $websale->id;
+                    $details->product_id = $detail['product_id'];
+                    $details->quantity = $detail['quantity'];
+                    $details->total = $detail['total'];
+                    $details->saveOrFail();
+                }
+            }
+
+            $record = new WebSaleRecord();
+            $record->transaction_id = $websale->id;
+            $record->user_id = request()->user()->id; // se registra el usuario que gestiona la actualizacion
+            $record->status = 1; // 0 => created, 1 => updated, 2 => deleted
+            $record->saveOrFail();
+
+            DB::commit();
+
+            $websale->details = $websale->web_sale_details;
+
+            return response()->json([
+                'message' => 'El pedido se ha actualizado exitosamente!',
+                'data' => $websale->attributesToArray()
+            ],200);
 
         } catch (\Exception $e) {
+            DB::rollBack();
             Log::error('WebSaleController::update - ' . $e->getMessage());
             return response()->json(['origin' => 'WebSaleController:update', 'message' => $e->getMessage()], 400);
         }
@@ -87,9 +129,14 @@ class WebSaleController extends Controller
     public function select(WebSale $order){
         try {
 
+            $user = request()->user();
+            if (!$user->isOwner($order) && !$user->isAdmin())
+                return response()->json(['message' => 'No posee permisos para acceder a este registro'],403);
+
             $order->details = $order->web_sale_details;
 
-            return response()->json($order->attributesToArray(),200);
+            return response()->json([
+                'data' => $order->attributesToArray()],200);
 
         } catch (\Exception $e) {
             Log::error('WebSaleController::select - ' . $e->getMessage());
@@ -105,9 +152,11 @@ class WebSaleController extends Controller
             $order->saveOrFail();
             DB::commit();
 
+            $order->details = $order->web_sale_details;
+
             return response()->json([
                 'message' => 'El estado de la orden ha sido modificado',
-                'status' => $order->status],200);
+                'data' => $order->attributesToArray()],200);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -115,5 +164,4 @@ class WebSaleController extends Controller
             return response()->json(['origin' => 'WebSaleController:status', 'message' => $e->getMessage()], 400);
         }
     }
-
 }
