@@ -84,14 +84,16 @@ class ProductController extends Controller
         $user->createToken('Personal Admin Token')->accessToken;
     }
 
-    public function getProducts()
+    public function getProducts($p)
     {
         try {
 
-            if ($request = request()->get('data')){
-
+            if ($request = request()->get('data') || isset($p)){
+                if(isset($p)){
+                    $request = $p;
+                }
                 $products = Product::with('image:files.id,files.name')
-                    ->where('status', '1')->whereRaw("name like '%$request%' OR description like '%{$request}%'")
+                    ->where('status', '1')->whereRaw("name like '%$request%' OR description like '%{$request}%' OR id='{$request}' ")
                     ->orderByDesc('id')->get();
 
                 $companies = Company::with('image:files.id,files.name')
