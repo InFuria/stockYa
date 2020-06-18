@@ -35,7 +35,7 @@ Vue.component('gallery',{
             <v-btn style="background-color:rgba(0,0,0,.5);" icon class="white--text" @click="product.ui.detailsShow=!product.ui.detailsShow">
               <v-icon>mdi-share-variant</v-icon>
             </v-btn>
-            <v-btn v-if="false" :class="product.ui.markColor[0]" icon @click="mark(product)">
+            <v-btn :class="product.ui.markColor[0]" icon @click="mark(product)">
               <v-icon :class="product.ui.markColor[1]">{{product.ui.mark}}</v-icon>
             </v-btn>
           </div>
@@ -61,7 +61,7 @@ Vue.component('gallery',{
                               gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
                               :height="$vuetify.breakpoint.xsOnly || $vuetify.breakpoint.smOnly ? '40vw' : '200px'"
                               @click="productView(product)"
-                              :contain="true" :src="image(img)"
+                              :cover="true" :src="image(img)"
                             >
                               <v-card-title class="justify-center" style="font-size:1rem;text-shadow:1px 1px 2px #000;word-break: break-word;line-height: 1rem;">{{product.name}}</v-card-title>
                             </v-img>
@@ -72,7 +72,7 @@ Vue.component('gallery',{
           </v-carousel>
           <small class="px-3 justify-center d-flex justify-space-between">
             <div class="d-flex justify-center" >
-              <span>Zona</span><span>{{ zone(product.zone) }}</span>
+              <span>Zona: </span><span>{{ zone(product.zone) }}</span>
             </div>
             <div class="d-flex" v-if="false" style="flex-direction:column">
               <span>Ventas</span>
@@ -80,6 +80,9 @@ Vue.component('gallery',{
             </div>
           </small>
           <v-card-actions @click="productView(product)" v-bind:class="product.mark=='mdi-bookmark' ? 'blue' : ''">
+            <template v-if="product.company.delivery > 0">
+              <v-icon>mdi-truck</v-icon>
+            </template>
             <template  v-if="false">
               <v-icon small color="yellow">mdi-star</v-icon><small>{{product.score}}</small>
             </template>

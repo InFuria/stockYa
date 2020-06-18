@@ -13,7 +13,7 @@ Vue.component("categories" , {
         },
         ofertas( v ){
             if(dataVue.search != 'ofertas'){
-                dataVue.search = "ofertas"
+                dataVue.search = 'ofertas'
             }else{
                 this.hide()
             }
