@@ -90,7 +90,7 @@ class ProductController extends Controller
 
             if ($request = request()->get('data')){
 
-                $products = Product::with('image:files.id,files.name')
+                $products = Product::with('company','image:files.id,files.name')
                     ->where('status', '1')->whereRaw("name like '%$request%' OR description like '%{$request}%'")
                     ->orderByDesc('id')->get();
 
