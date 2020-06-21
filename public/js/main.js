@@ -6,6 +6,7 @@ var dataVue = new Object({
 		color:{primary:"orange darken-4"},
 		componentLoadingList:[],
 		show:new ShowComponents,
+		showCategories:false,
 		img:0,
 		search:"",
 		cart:new CartProducts,
@@ -14,6 +15,7 @@ var dataVue = new Object({
 		productsList:[],
 		client:new Client,
 		categories:["","Comidas","Indumentaria","Postres","Regaleria","Herramientas","Recambios"],
+		categoriesProducts:[],
 		sectors:[],
 		socials: [
 			{
@@ -100,13 +102,14 @@ function vueLaunch() {
 				this.show.company = false
 				this.show.gallery = false
 				if(v == "ofertas"){					
-					API.getter('products', {type:"promo"})
+					API.getter('products', {type:"ofertas"})
 					.then((response)=>{
 						this.gallery(response.data.data);
 					})
 					.catch(function (error) {
 						console.log(error);
 					})
+					this.viewCategories('false')
 				}else{
 					if(v.search('vendedor')>-1){
 						products().fromCompany(v)
@@ -121,6 +124,17 @@ function vueLaunch() {
 						})
 						.catch(function (error) {
 							console.log(error);
+						})
+					}else{
+						this.productsList=[]
+						products().api('find',{find:v})
+						.then( res => {
+							if(res.data.data != undefined){
+								if(res.data.data.products != undefined){
+									this.gallery(res.data.data.products)
+								}
+							}
+							this.showCategories=false
 						})
 					}
 				}
@@ -163,6 +177,17 @@ function vueLaunch() {
 				console.log({img})
 				return API.route('file','open',img).url
 			},
+			viewCategories(v){
+				if(this.categoriesProducts.length == 0){
+					Categories.api('list',{is:'products'})
+					.then( res => {
+						this.categoriesProducts = res.data.data
+						this.showCategories = v
+					})
+				}else{
+					this.showCategories = v
+				}
+			}
 		},
 		mounted(){
 			document.getElementById("loading").classList.add("off")
@@ -170,6 +195,9 @@ function vueLaunch() {
 			setTimeout( ()=> {
 				this.search = "ofertas"
 				this.footerViewer = false
+				setTimeout( () => {
+					this.showCategories = false
+				},1000);
 			 }, 1000)
 		}
 	})

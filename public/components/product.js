@@ -15,7 +15,7 @@ Vue.component('product', {
         }
     },
     methods:{
-        zone(v){ return Product.zone(v) },
+        zone(v){ return products().zone(v) },
         companyView(company){
             this.$emit("search", "vendedor:"+company)
         },
@@ -62,15 +62,15 @@ Vue.component('product', {
     <v-row>
     <v-col xs="12" sm="12" md="6">
         <div class="px-1">
-            <v-carousel v-if="$vuetify.breakpoint.xsOnly && product.image.toString().search('jpg') > -1" v-model="model" style="max-height:320px;max-width:320px" :hide-delimiters="(product.image.length < 2)" :show-arrows="(product.image.length > 1)">
+            <v-carousel v-if="$vuetify.breakpoint.xsOnly" v-model="model" style="max-height:320px;max-width:100vw" :hide-delimiters="(product.image.length < 2)" :show-arrows="(product.image.length > 1)">
                 <v-carousel-item
-                    v-for="image of product.image"
-                    :key="image"
+                    v-for="img of product.image"
+                    :key="img.id"
                 >
                     <v-sheet
-                    height="320px"
-                    width="320px"
-                    tile
+                        height="320px"
+                        width="100vw"
+                        tile
                     >
                     <v-row
                         class="fill-height"
@@ -78,9 +78,9 @@ Vue.component('product', {
                         justify="center"
                     >
                         <div class="display-1">
-                            <v-img width="320px" height="320px"
+                            <v-img width="100vw" height="320px"
                                 loading="lazy" 
-                                :src="image(image)"
+                                :src="image(img)"
                                 :contain="false"
                             ></v-img>
                         </div>
@@ -90,13 +90,13 @@ Vue.component('product', {
             </v-carousel>
             <v-carousel v-else v-model="imagesSliderStatus" style="max-height:480px;max-width:480px" :hide-delimiters="(product.image.length < 2)" :show-arrows="(product.image.length > 1)">
                 <v-carousel-item
-                    v-for="image of product.image"
-                    :key="image"
+                    v-for="img of product.image"
+                    :key="img.id"
                 >
                     <v-sheet
-                    height="480px"
-                    width="480px"
-                    tile
+                        width="480px"
+                        height="480px"
+                        tile
                     >
                     <v-row
                         class="fill-height"
@@ -106,7 +106,7 @@ Vue.component('product', {
                         <div class="display-1">
                             <v-img width="480px" height="480px"
                                 loading="lazy" 
-                                :src="image(image)"
+                                :src="image(img)"
                                 :contain="false"
                             ></v-img>
                         </div>

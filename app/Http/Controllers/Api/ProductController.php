@@ -81,16 +81,14 @@ class ProductController extends Controller
         $user->createToken('Personal Admin Token')->accessToken;
     }
 
-    public function getProducts($p)
+    public function getProducts()
     {
         try {
 
-            if ($request = request()->get('data') || isset($p)){
-                if(isset($p)){
-                    $request = $p;
-                }
-                $products = Product::with('image:files.id,files.name')
-                    ->where('status', '1')->whereRaw("name like '%$request%' OR description like '%{$request}%' OR id='{$request}' ")
+            if ($request = request()->get('data')){
+
+                $products = Product::with('company','image:files.id,files.name')
+                    ->where('status', '1')->whereRaw("name like '%$request%' OR description like '%{$request}%'")
                     ->orderByDesc('id')->get();
 
                 $companies = Company::with('image:files.id,files.name')
@@ -143,12 +141,25 @@ class ProductController extends Controller
             }
 
             if (is_integer($status = request()->get('status'))) {
-
                 $products = Product::where('status', (integer)request()->status)->with('company', 'tags', 'image:files.id,files.name')
                     ->orderByDesc('id')->paginate(50);
             } else {
-
-                $products = Product::with('company', 'tags', 'image:files.id,files.name')->orderByDesc('id')->paginate(50);
+                if ($request = request()->get('type')) {
+                    if(request()->type == 'ofertas'){
+                        $products = Product::where('type','')
+                            ->orWhere('type','Combo')
+                            ->orWhere('type','Descuento')
+                            ->orWhere('type','Oferta')
+                            ->with('company', 'tags', 'image:files.id,files.name')
+                            ->orderByDesc('id')->paginate(50);
+                    }else{
+                        $products = Product::where('type', ucwords(request()->type) )
+                            ->with('company', 'tags', 'image:files.id,files.name')
+                            ->orderByDesc('id')->paginate(50);
+                    }
+                }else{
+                    $products = Product::with('company', 'tags', 'image:files.id,files.name')->orderByDesc('id')->paginate(50);
+                }
             }
 
             return response()->json($products);

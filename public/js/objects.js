@@ -16,7 +16,7 @@ class NavegationManager{
 
 class ShowComponents{
 	constructor(){
-        for(let attr of ["client","product","cart","categories","gallery","company","map"]){
+        for(let attr of ["client","product","cart","categories","gallery","company","map","categories"]){
             this[attr] = false
         }
     }
@@ -206,10 +206,24 @@ class Products extends APIHelper{
     normalize(v){
         return v
     }
+    valid(v){
+        return v
+    }
     fromCompany(v){
         return this.api('listFromCompany', {id:v.split("@")[1]})
     }
     zone(zone){
         return zone == 1 ? "Centro" : (zone == 2 ? "Sur" : "Norte")
+    }
+}
+
+
+class Categories{
+    static api(action, params, paramsUrl){
+        params = params == undefined ? {} : params
+        paramsUrl = paramsUrl == undefined ? params : paramsUrl
+        let { method , url } = API.route('categories' , action , paramsUrl)
+        delete params.id
+        return axios[method]( url , params)
     }
 }

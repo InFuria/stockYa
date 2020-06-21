@@ -22,16 +22,16 @@ Vue.component('cart',{
 			}else{
 				dataVue.client.proccessCompanyId = null
 				mensaje="pedidosgoya.com/?websale=123857"
-				window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}&phone=54${dataVue.cart.companies[companyId].contact.whatsapp}`);
-				//console.log("concretar venta ", dataVue.cart.companies[companyId].contact.whatsapp)
+				window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}&phone=54${dataVue.cart.companies[companyId].whatsapp}`);
+				//console.log("concretar venta ", dataVue.cart.companies[companyId].whatsapp)
 			}
 		},
 		sendMessagge(companyId){
 			dataVue.client.proccessCompanyId = companyId
-			//console.log("seller ", dataVue.cart.companies[companyId].contact.whatsapp)
+			//console.log("seller ", dataVue.cart.companies[companyId].whatsapp)
 			modal("cart" , false)
 			modal("client" , true)
-			//window.open(`https://api.whatsapp.com/send?phone=${seller.contact.whatsapp}&text=Nuevo Pedido`)
+			//window.open(`https://api.whatsapp.com/send?phone=${seller.whatsapp}&text=Nuevo Pedido`)
 		},
 		productCantTemporal(product , cant){
 			cant = typeof cant == 'object' ? cant.target.value : ( cant == undefined ? product.cant : cant )
@@ -41,6 +41,9 @@ Vue.component('cart',{
 		productView(product){
 			modal("cart" , false)
 			this.$emit("productview", product)
+		},
+		image(img){
+			return API.route('file','open',img).url
 		},
         hide() {
             modal("cart" , false)
@@ -100,8 +103,10 @@ Vue.component('cart',{
 							@click="productView(product)"
 							v-if="product.image.length"
 						>
-							<v-img loading="lazy" v-if="product.image[0].search('mp4') == -1" :src="product.image[0]"></v-img>
+							<v-img loading="lazy" :src="image(product.image[0])"></v-img>
+							<!--
 							<video loading="lazy" preload width="100%" height="100%" v-else :src="product.image[0]" controls></video>
+							-->
 						</v-list-item-avatar>
 						</v-list-item>
 					</v-card>

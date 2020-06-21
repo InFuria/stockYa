@@ -18,6 +18,7 @@ class API{
                 imageDefault:{url:'https://industriacide.com/wp-content/uploads/2019/08/Various-Steps-In-Forming-A-Company-750x430.jpg'}
             },
             product:{
+                find:{method:'get',url:'products?data=<find>'},
                 list:{method:'get',url:'products'},
 				listPage:{method:'get',url:'products?page=<page>'},
 				listFromCompany:{method:'get',url:'products?company_id=<id>&page=<page>'},
@@ -47,7 +48,8 @@ class API{
         }
         res.url = res.url.search('http') == -1 ? API.dominio() + res.url : res.url
         
-        if(res.url == "https://kaizen-donarosa.com/api/files/<id>"){
+        if(res.url == "https://kaizen-donarosa.com/api/files/<id>"
+        || res.url == "http://kaizen-donarosa.com/api/files/<id>"){
             res.url = API.route('company','imageDefault').url
         }
         return res
