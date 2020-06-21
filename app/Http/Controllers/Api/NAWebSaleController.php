@@ -54,6 +54,7 @@ class NAWebSaleController extends Controller
                 $details = new NAWebSaleDetail();
                 $details->na_web_sale_id = $websale->id;
                 $details->product_id = $detail['product_id'];
+                $details->price = $detail['price'];
                 $details->quantity = $detail['quantity'];
                 $details->subtotal = $detail['subtotal'];
                 $details->saveOrFail();
@@ -102,6 +103,7 @@ class NAWebSaleController extends Controller
                     $details = new NAWebSaleDetail();
                     $details->na_web_sale_id = $websale->id;
                     $details->product_id = $detail['product_id'];
+                    $details->price = $detail['price'];
                     $details->quantity = $detail['quantity'];
                     $details->subtotal = $detail['subtotal'];
                     $details->save();
