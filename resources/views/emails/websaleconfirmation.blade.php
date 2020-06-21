@@ -3,7 +3,14 @@
 
 <style>
     #tblContainer{
-        border: solid darkgrey 2px;
+        border: solid #fbab04 2px;
+        width: 700px;
+    }
+
+    .banner {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
     }
 </style>
 
@@ -11,7 +18,7 @@
 <body>
 <div class="container" id="tblContainer">
 
-    <img src="{{ asset('uploadedimages/bannner.jpg') }}" width="700px" height="110px" style="border:none; text-decoration:none; padding-bottom:25px">
+    <img class="banner" src="https://kaizen-donarosa.com/api/files/190" width="700px" height="110px" style="border:none; text-decoration:none; padding-bottom:25px">
 
     <div style="text-align: center">
         <h3 style="font:normal bold 1.625em/1.73em TrebuchetMS; letter-spacing:0.4px; color:#333333">DETALLES DEL PEDIDO</h3>
@@ -66,7 +73,7 @@
             <table align="center" cellpadding="5" cellspacing="5" width="82%" style="width:594px; font:italic normal 0.938em/2em TrebuchetMS; color:#333333; letter-spacing:0.2px; padding-bottom:27px">
                 <tbody>
                     <tr style="padding-bottom:42px">
-                        <td width="65%" align="left">Producto</td>
+                        <td width="auto" align="left">Producto</td>
                         <td align="center">PrecioU.</td>
                         <td align="center">Cantidad</td>
                         <td align="center">Total</td>
@@ -74,8 +81,7 @@
 
                     @foreach($products as $product)
                         <tr style="color:#807f7f">
-                            <td width="46%" align="left"><li>{{ $product['detail']['name'] }}</li>
-                            </td>
+                            <td width="46%" align="left"><li>{{ $product['detail']['name'] }}</li></td>
                             <td width="14%" align="center">{{ $product['price'] . ' $'}}</td>
                             <td width="12%" align="center">{{ $product['quantity'] }}</td>
                             <td width="14%" align="center">{{ $product['subtotal'] . ' $'}}</td>
