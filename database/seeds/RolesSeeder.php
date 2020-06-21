@@ -1,5 +1,6 @@
 <?php
 
+use App\Company;
 use App\Role;
 use Illuminate\Database\Seeder;
 
@@ -22,6 +23,15 @@ class RolesSeeder extends Seeder
                 'manage-categories',
                 'manage-users',
                 'manage-orders'
+            ]
+        ]);
+
+        $seller = Role::create([
+            'name' => 'Seller',
+            'slug' => 'seller',
+            'permissions' => [
+                'access-seller-panel',
+                'manage-company-orders'
             ]
         ]);
 

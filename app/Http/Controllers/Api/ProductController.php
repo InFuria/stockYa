@@ -43,19 +43,16 @@ class ProductController extends Controller
             ['name' => 'cat 1']
         );
 
-        $cat2 = \DB::table('products_categories')->insert(
-            ['name' => 'cat 1']
-        );
-
         factory(User::class, 50)->create();
 
         factory(Company::class, 5)->create();
         factory(ProductCategory::class, 50)->create();
         factory(Product::class, 50)->create();
+        factory(Product::class, 50)->create();
 
-        factory(WebSale::class, 20)->create();
+        /*factory(WebSale::class, 20)->create();
         factory(WebSaleDetail::class, 15)->create();
-        factory(WebSaleRecord::class, 15)->create();
+        factory(WebSaleRecord::class, 15)->create();*/
 
         $user = new User();
         $user->dni = 12345678;

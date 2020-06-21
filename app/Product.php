@@ -11,6 +11,8 @@ class Product extends Model
         'slug', 'name', 'description', 'type', 'price', 'category_id', 'company_id', 'score', 'score_count', 'status', 'visits'
     ];
 
+    protected $hidden = ['pivot'];
+
     protected static function boot()
     {
         parent::boot();
@@ -42,5 +44,9 @@ class Product extends Model
 
     public function image(){
         return $this->files();
+    }
+
+    public function na_web_sale(){
+        return $this->belongsToMany(NAWebSaleDetail::class);
     }
 }

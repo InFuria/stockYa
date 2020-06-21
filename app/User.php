@@ -17,7 +17,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'dni', 'token', 'username', 'name', 'address', 'phone', 'status', 'email', 'password'
+        'dni', 'token', 'company_id', 'username', 'name', 'address', 'phone', 'status', 'email', 'password'
     ];
 
     /**
@@ -52,6 +52,24 @@ class User extends Authenticatable
         return $this->belongsToMany(Role::class, 'role_users');
     }
 
+    public function isOwner($websale){
+        return $this->id == $websale->client_id;
+    }
+
+    public function isAdmin(){
+        return $this->inRole('admin');
+    }
+
+    public function isSeller(){
+        return $this->inRole('seller') && isset($this->company_id);
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id');
+    }
+
+
     /**
      * Checks if User has access to $permissions.
      */
@@ -72,13 +90,5 @@ class User extends Authenticatable
     public function inRole(string $roleSlug)
     {
         return $this->roles()->where('slug', $roleSlug)->count() == 1;
-    }
-
-    public function isOwner($websale){
-        return $this->id == $websale->client_id;
-    }
-
-    public function isAdmin(){
-        return $this->inRole('admin');
     }
 }

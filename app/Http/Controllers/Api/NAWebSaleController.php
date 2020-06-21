@@ -2,40 +2,66 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\File;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\WebSaleRequest;
-use App\WebSale;
-use App\WebSaleDetail;
-use App\WebSaleRecord;
+use App\Http\Requests\NAWebSaleRequest;
+use App\Mail\WebSaleConfirmationMail;
+use App\NAWebSale;
+use App\NAWebSaleDetail;
+use App\NAWebSaleRecord;
+use Barryvdh\DomPDF\Facade as PDF;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
-class WebSaleController extends Controller
+class NAWebSaleController extends Controller
 {
-
-    public function store(WebSaleRequest $request){
-        DB::beginTransaction();
+    public function getOrders(){
         try {
+            $user = request()->user();
+            if ($user->isSeller())
+                return response()->json(['data' => $user->company->na_web_sales]);
 
-            $websale = WebSale::create($request->all());
+            if (request()->get('tracker'))
+                return response()->json(['data' => $user->company->na_web_sales->where('tracker', request()->tracker)->first()]);
+
+            $sales = NAWebSale::paginate(50);
+
+            return response()->json(['data' => $sales],200);
+
+        } catch (\Exception $e) {
+            Log::error('WebSaleController::getOrders - ' . $e->getMessage());
+            return response()->json(['origin' => 'WebSaleController:getOrders', 'message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function store(NAWebSaleRequest $request){
+        try {
+            DB::beginTransaction();
+
+            $websale = NAWebSale::create($request->all());
 
             DB::commit();
             DB::beginTransaction();
 
             $sale_detail = request()->get('details');
+            if (!isset($sale_detail))
+                return response()->json(['message' => 'No se han seleccionado productos']);
+
             foreach ($sale_detail as $detail){
-                $details = new WebSaleDetail();
-                $details->web_sale_id = $websale->id;
+                $details = new NAWebSaleDetail();
+                $details->na_web_sale_id = $websale->id;
                 $details->product_id = $detail['product_id'];
                 $details->quantity = $detail['quantity'];
-                $details->total = $detail['total'];
+                $details->subtotal = $detail['subtotal'];
                 $details->saveOrFail();
             }
 
-            $record = new WebSaleRecord();
+            $record = new NAWebSaleRecord();
             $record->transaction_id = $websale->id;
-            $record->user_id = $websale->client_id;
+            $record->user_id = null;
             $record->status = 0;// 0 => created, 1 => updated, 2 => deleted
             $record->saveOrFail();
 
@@ -55,42 +81,38 @@ class WebSaleController extends Controller
         }
     }
 
-    public function update(Request $request, WebSale $websale){
+    public function update(Request $request, NAWebSale $websale){
         DB::beginTransaction();
         try {
 
-            $user = request()->user();
-            if (!$user->isOwner($websale) && !$user->isAdmin())
-                return response()->json(['message' => 'No posee permisos para acceder a este registro'],403);
-
             $request = $request->validate([
-                'company_id' => 'integer',
-                'payment_id' => 'integer',
-                'client_id' => 'integer',
-                'status' => 'integer',
+                'client_name' => 'string',
+                'email' => 'string',
+                'phone' => 'string',
+                'company_id' => 'numeric',
                 'total' => 'numeric',
                 'tags' => 'string',
                 'text' => 'string'
             ]);
             $websale->update($request);
 
+            $websale->web_sale_details()->delete();
             if ($sale_detail = request()->get('details')){
-                $websale->web_sale_details()->delete();
                 foreach ($sale_detail as $detail){
-                    $details = new WebSaleDetail();
-                    $details->web_sale_id = $websale->id;
+                    $details = new NAWebSaleDetail();
+                    $details->na_web_sale_id = $websale->id;
                     $details->product_id = $detail['product_id'];
                     $details->quantity = $detail['quantity'];
-                    $details->total = $detail['total'];
-                    $details->saveOrFail();
+                    $details->subtotal = $detail['subtotal'];
+                    $details->save();
                 }
             }
 
-            $record = new WebSaleRecord();
+            $record = new NAWebSaleRecord();
             $record->transaction_id = $websale->id;
             $record->user_id = request()->user()->id; // se registra el usuario que gestiona la actualizacion
             $record->status = 1; // 0 => created, 1 => updated, 2 => deleted
-            $record->saveOrFail();
+            $record->save();
 
             DB::commit();
 
@@ -108,30 +130,8 @@ class WebSaleController extends Controller
         }
     }
 
-    public function tracking(){
+    public function select(NAWebSale $order){
         try {
-
-            $sales = request()->user()->websales()->with('web_sale_details')->orderBy('status', 'DESC');
-
-            if (request()->get('tracker'))
-                $sales = $sales->where('tracker', request()->tracker);
-
-            $sales = $sales->paginate(25);
-
-            return response()->json($sales,200);
-
-        } catch (\Exception $e) {
-            Log::error('WebSaleController::tracking - ' . $e->getMessage());
-            return response()->json(['origin' => 'WebSaleController:tracking', 'message' => $e->getMessage()], 400);
-        }
-    }
-
-    public function select(WebSale $order){
-        try {
-
-            $user = request()->user();
-            if (!$user->isOwner($order) && !$user->isAdmin())
-                return response()->json(['message' => 'No posee permisos para acceder a este registro'],403);
 
             $order->details = $order->web_sale_details;
 
@@ -144,7 +144,7 @@ class WebSaleController extends Controller
         }
     }
 
-    public function status(WebSale $order){
+    public function status(NAWebSale $order){
         DB::beginTransaction();
         try {
 
@@ -162,6 +162,41 @@ class WebSaleController extends Controller
             DB::rollBack();
             Log::error('WebSaleController::status - ' . $e->getMessage());
             return response()->json(['origin' => 'WebSaleController:status', 'message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function sendTicket(NAWebSale $order){
+        try {
+
+            $products = $order->web_sale_details()->with('detail')->get()->toArray();
+            $delivery = $order->company->delivery;
+
+            $pdf = PDF::loadView('emails.websaleconfirmation', [
+                'order' => $order,
+                'delivery' => $delivery,
+                'products' => $products]);
+
+            $filename = "{$order->id}_" . Carbon::now()->format('Y_d_m_H_i_s') . ".pdf";
+            $pdf->save(storage_path().'/tickets/' . $filename . '');
+
+            $file = File::insertGetId([
+                'slug' => "ticket+{$filename}",
+                'name' => $filename,
+                'status' => 1,
+                'apply' => 1
+            ]);
+            File::sync([], [$file], $order, 'nawebsale');
+
+            if (isset($order->email))
+                Mail::to("federicolucena1994@gmail.com")->send(new WebSaleConfirmationMail($order));
+
+            //if (isset($order->phone))
+                //
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('WebSaleController::sendTicket - ' . $e->getMessage());
+            return response()->json(['origin' => 'WebSaleController:sendTicket', 'message' => $e->getMessage()], 400);
         }
     }
 }

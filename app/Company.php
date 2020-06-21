@@ -43,4 +43,12 @@ class Company extends Model
     public function image(){
         return $this->files();
     }
+
+    public function users(){
+        return $this->hasMany(User::class);
+    }
+
+    public function na_web_sales(){
+        return $this->hasMany(NAWebSale::class);
+    }
 }

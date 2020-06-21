@@ -16,11 +16,9 @@ class CheckWebSalesAccess
      */
     public function handle($request, Closure $next)
     {
-        $isAdmin = Gate::inspect('isAdmin', request()->user())->allowed();
-        $isOwner = Gate::inspect('isOwner', [request()->user(), request()->order])->allowed();
-
-        if ($isAdmin == false || ($isOwner == false && $isAdmin == false))
-            return response()->json('Usuario no autorizado.',400);
+        $user = request()->user();
+        if (!$user->isSeller() && !$user->isAdmin())
+            return response()->json(['message' => 'No posee permisos para acceder a este registro'],403);
 
         return $next($request);
     }

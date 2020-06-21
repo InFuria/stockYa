@@ -2,9 +2,7 @@
 
 namespace App;
 
-
 use Illuminate\Database\Eloquent\Model;
-use App\Company;
 use Illuminate\Support\Facades\DB;
 
 class File extends Model
@@ -20,6 +18,10 @@ class File extends Model
 
     public function companies(){
         return $this->belongsToMany(Company::class);
+    }
+
+    public function nawebsale(){
+        return $this->belongsToMany(NAWebSale::class);
     }
 
     public static function sync($old, $new, $entity, $origin){

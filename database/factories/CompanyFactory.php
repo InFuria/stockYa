@@ -20,6 +20,6 @@ $factory->define(Company::class, function (Faker $faker) {
         'zone' => 'asdasdadasd',
         'status' => $faker->numberBetween(1,3),
         'attention_hours' => 'asdasdads',
-        'category_id' => $faker->numberBetween(1,2)
+        'category_id' => 1
     ];
 });

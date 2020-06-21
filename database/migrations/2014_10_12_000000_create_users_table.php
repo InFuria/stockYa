@@ -17,6 +17,7 @@ class CreateUsersTable extends Migration
             $table->bigIncrements('id');
             $table->string('token', 99999)->nullable();
             $table->bigInteger('dni')->unique();
+            $table->integer('company_id')->nullable();
             $table->string('username')->unique();
             $table->string('name')->nullable();
             $table->string('address')->nullable();
