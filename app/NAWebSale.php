@@ -19,6 +19,7 @@ class NAWebSale extends Model
         static::creating(function ($query) {
             $query->status = 0; // 0 => pendiente, 1 => completado, 2 => cancelado, 3 => en revision
             $query->tracker = Str::random();
+            $query->total = 0;
         });
     }
 

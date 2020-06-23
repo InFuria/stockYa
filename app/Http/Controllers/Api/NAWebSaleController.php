@@ -9,6 +9,7 @@ use App\Mail\WebSaleConfirmationMail;
 use App\NAWebSale;
 use App\NAWebSaleDetail;
 use App\NAWebSaleRecord;
+use App\Product;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -51,14 +52,18 @@ class NAWebSaleController extends Controller
                 return response()->json(['message' => 'No se han seleccionado productos']);
 
             foreach ($sale_detail as $detail){
+                $price = (Integer) Product::where('id', $detail['product_id'])->first()->price;
+
                 $details = new NAWebSaleDetail();
                 $details->na_web_sale_id = $websale->id;
                 $details->product_id = $detail['product_id'];
-                $details->price = $detail['price'];
                 $details->quantity = $detail['quantity'];
-                $details->subtotal = $detail['subtotal'];
+                $details->subtotal = (Integer) $detail['quantity'] * $price;
                 $details->saveOrFail();
             }
+
+            $websale->total = array_sum($websale->web_sale_details->pluck('subtotal')->toArray());
+            $websale->save();
 
             $record = new NAWebSaleRecord();
             $record->transaction_id = $websale->id;
@@ -91,7 +96,6 @@ class NAWebSaleController extends Controller
                 'email' => 'string',
                 'phone' => 'string',
                 'company_id' => 'numeric',
-                'total' => 'numeric',
                 'tags' => 'string',
                 'text' => 'string'
             ]);
@@ -100,15 +104,19 @@ class NAWebSaleController extends Controller
             $websale->web_sale_details()->delete();
             if ($sale_detail = request()->get('details')){
                 foreach ($sale_detail as $detail){
+                    $price = (Integer) Product::where('id', $detail['product_id'])->first()->price;
+
                     $details = new NAWebSaleDetail();
                     $details->na_web_sale_id = $websale->id;
                     $details->product_id = $detail['product_id'];
-                    $details->price = $detail['price'];
                     $details->quantity = $detail['quantity'];
-                    $details->subtotal = $detail['subtotal'];
+                    $details->subtotal = (Integer) $detail['quantity'] * $price;
                     $details->save();
                 }
             }
+
+            $websale->total = array_sum($websale->web_sale_details->pluck('subtotal')->toArray());
+            $websale->save();
 
             $record = new NAWebSaleRecord();
             $record->transaction_id = $websale->id;
@@ -174,6 +182,7 @@ class NAWebSaleController extends Controller
             $delivery = $order->company->delivery;
 
             $pdf = PDF::loadView('emails.websaleconfirmation', [
+                'banner_style' => "height: 50px; padding-bottom: 25px;",
                 'order' => $order,
                 'delivery' => $delivery,
                 'products' => $products]);
@@ -190,11 +199,11 @@ class NAWebSaleController extends Controller
             File::sync([], [$file], $order, 'nawebsale');
 
             if (isset($order->email))
-                Mail::to("federicolucena1994@gmail.com")->send(new WebSaleConfirmationMail($order));
-
+                Mail::to("federicolucena1994@gmail.com")->send(new WebSaleConfirmationMail($order, $file));
+/*
             if (isset($order->phone)){
                 NAWebSale::sendTicketByWhatsapp($order, $file);
-            }
+            }*/
 
             return response()->json([
                 'message' => 'Se ha enviado el ticket al cliente!',
