@@ -39,16 +39,16 @@ class ProductController extends Controller
             ['name' => 'gr']
         );
 
-        $cat1 = \DB::table('company_categories')->insert(
+        /*$cat1 = \DB::table('company_categories')->insert(
             ['name' => 'cat 1']
-        );
+        );*/
 
-        factory(User::class, 50)->create();
+        //factory(User::class, 50)->create();
 
-        factory(Company::class, 5)->create();
+        /*factory(Company::class, 5)->create();
         factory(ProductCategory::class, 50)->create();
         factory(Product::class, 50)->create();
-        factory(Product::class, 50)->create();
+        factory(Product::class, 50)->create();*/
 
         /*factory(WebSale::class, 20)->create();
         factory(WebSaleDetail::class, 15)->create();
@@ -65,6 +65,7 @@ class ProductController extends Controller
         $user->password = Hash::make('undertale');
         $user->save();
 
+        $user->roles()->sync([1]);
         $user->createToken('Personal Admin Token')->accessToken;
 
         $user = new User();
@@ -78,6 +79,7 @@ class ProductController extends Controller
         $user->password = Hash::make('undertale');
         $user->save();
 
+        $user->roles()->sync([1]);
         $user->createToken('Personal Admin Token')->accessToken;
     }
 

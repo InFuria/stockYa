@@ -52,7 +52,7 @@ class FileController extends Controller
 
         } catch (\Exception $e){
             Log::error('FileController::apply - ' . $e->getMessage());
-            return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
@@ -74,11 +74,11 @@ class FileController extends Controller
         } catch (QueryException $qe){
             DB::rollBack();
             Log::error('FileController::storeDB - ' . $qe->getMessage());
-            return response('Ha ocurrido un error al procesar la consulta', 400)->json(['message' => $qe->getMessage()]);
+            return response()->json(['message' => $qe->getMessage()], 400);
         } catch (\Exception $e) {
             DB::rollback();
             Log::error('FileController::storeDB - ' . $e->getMessage());
-            return response()->json(['error' => true, 'message' => $e->getMessage()], 404);
+            return response()->json(['error' => true, 'message' => $e->getMessage()], 400);
         }
     }
 
