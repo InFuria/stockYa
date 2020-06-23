@@ -34,7 +34,6 @@ class CreateNAWebSalesTable extends Migration
             $table->foreign('na_web_sale_id')->references('id')->on('na_web_sales')->onDelete('cascade');
             $table->unsignedBigInteger('product_id');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
-            $table->double('price', 10, 2);
             $table->integer('quantity');
             $table->double('subtotal', 10,2);
         });

@@ -16,6 +16,8 @@ class FileController extends Controller
             if (isset($file)) {
 
                 $file = File::where('id', $file)->first();
+                if (strpos($file->name, '.pdf'))
+                    return response()->file(storage_path('/tickets/') . $file->name);
 
                 return response()->file(public_path('/uploadedimages/') . $file->name);
             }
