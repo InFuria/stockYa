@@ -5,6 +5,7 @@
     #tblContainer{
         border: solid #fbab04 2px;
         width: 700px;
+        height: auto;
     }
 
     .banner {
@@ -18,7 +19,9 @@
 <body>
 <div class="container" id="tblContainer">
 
-    <img class="banner" src="https://kaizen-donarosa.com/api/files/190" width="700px" height="110px" style="border:none; text-decoration:none; padding-bottom:25px">
+    <div>
+        <img class="banner" src="https://kaizen-donarosa.com/api/files/190" width="700px" height="110px" style="border:none; text-decoration:none; margin-bottom:50px">
+    </div>
 
     <div style="text-align: center">
         <h3 style="font:normal bold 1.625em/1.73em TrebuchetMS; letter-spacing:0.4px; color:#333333">DETALLES DEL PEDIDO</h3>

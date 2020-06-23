@@ -190,8 +190,14 @@ class NAWebSaleController extends Controller
             if (isset($order->email))
                 Mail::to("federicolucena1994@gmail.com")->send(new WebSaleConfirmationMail($order));
 
-            //if (isset($order->phone))
-                //
+            if (isset($order->phone)){
+                NAWebSale::sendTicketByWhatsapp($order, $file);
+            }
+
+            return response()->json([
+                'message' => 'Se ha enviado el ticket al cliente!',
+                'order' => $order
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();

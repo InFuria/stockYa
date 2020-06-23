@@ -16,6 +16,8 @@ class FileController extends Controller
             if (isset($file)) {
 
                 $file = File::where('id', $file)->first();
+                if (strpos($file->name, '.pdf'))
+                    return response()->file(storage_path('/tickets/') . $file->name);
 
                 return response()->file(public_path('/uploadedimages/') . $file->name);
             }
@@ -24,7 +26,7 @@ class FileController extends Controller
 
         } catch (\Exception $e){
             Log::error('FileController::store - ' . $e->getMessage());
-            return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
@@ -39,7 +41,7 @@ class FileController extends Controller
 
         } catch (\Exception $e){
             Log::error('FileController::store - ' . $e->getMessage());
-            return response('Ha ocurrido un error.', 400)->json(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 
