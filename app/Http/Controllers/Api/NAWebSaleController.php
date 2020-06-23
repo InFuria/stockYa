@@ -199,9 +199,9 @@ class NAWebSaleController extends Controller
             File::sync([], [$file], $order, 'nawebsale');
 
             if (isset($order->email))
-                Mail::to("federicolucena1994@gmail.com")->send(new WebSaleConfirmationMail($order, $file));
-/*
-            if (isset($order->phone)){
+                Mail::to("{$order->email}")->send(new WebSaleConfirmationMail($order, $file));
+
+            /*if (isset($order->phone)){
                 NAWebSale::sendTicketByWhatsapp($order, $file);
             }*/
 

@@ -152,7 +152,7 @@ class AuthController extends Controller
         }
 
         $http = new Client;
-        $response = $http->request('POST', 'http://stockYa.local:92/oauth/token', [
+        $response = $http->request('POST', 'https://kaizen-donarosa.com/oauth/token', [
             'headers' => [
                 'cache-control' => 'no-cache',
                 'Content-Type' => 'application/x-www-form-urlencoded'
