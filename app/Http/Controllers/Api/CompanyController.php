@@ -107,7 +107,7 @@ class CompanyController extends Controller
             ]);
             */
             $request = $request->all();
-            $request['slug'] = "+".urlencode($request['name']);
+            $request['slug'] = urlencode($request['name']);
 
             $company->update($request);
 
