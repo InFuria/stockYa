@@ -38,7 +38,7 @@
         <div class="row" style="text-align: center;">
             <div class="col-12">
                 <table align="center" width="82%" style="width:594px; font:normal normal 0.938em/2.33em TrebuchetMS; color:#333333; letter-spacing:0.2px;">
-                    <tbody>
+                    <tbody align="left">
                     <tr>
                         <td width="39%" style="padding-right:1%"><strong>Pedido No.:</strong></td>
                         <td width="60%" style="color:#7b7b7b">{{ $order['id'] }}</td>

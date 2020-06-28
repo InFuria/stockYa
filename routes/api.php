@@ -28,6 +28,7 @@ Route::get('categories/products/{category}', 'Api\ProductCategoryController@sele
 Route::get('tags', 'Api\TagController@getTags');
 Route::get('tags/{tag}', 'Api\TagController@select');
 Route::post('nawebsales','Api\NAWebSaleController@store');
+Route::get('nawebsales/{tracker}/download','Api\NAWebSaleController@downloadTicket')->name('download.ticket');
 
 Route::post('products/{product}/visit', 'Api\ProductController@visits');
 Route::post('companies/{company}/visit', 'Api\CompanyController@visits');
@@ -90,6 +91,14 @@ Route::middleware(['auth:api'])->group(function () {
     Route::patch('users/{user}','Api\UserController@update');
     Route::delete('users/{user}','Api\UserController@destroy');
     Route::post('users/{user}/ban','Api\UserController@ban');
+
+    Route::get('roles', 'Api\RoleController@getRoles');
+    Route::post('roles','Api\RoleController@store');
+    Route::get('roles/{role}', 'Api\RoleController@select');
+    Route::put('roles/{role}','Api\RoleController@update');
+    Route::patch('roles/{role}','Api\RoleController@update');
+    Route::delete('roles/{role}','Api\RoleController@destroy');
+    Route::post('roles/{role}/ban','Api\RoleController@ban');
 
 
     /** NO AUTH WEB SALES ROUTES */

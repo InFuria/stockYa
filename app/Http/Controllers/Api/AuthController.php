@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Role;
 use App\User;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -22,6 +23,7 @@ class AuthController extends Controller
         try {
             $request->validate([
                 'dni' => 'required',
+                'company_id' => 'numeric',
                 'username' => 'required|string',
                 'name' => 'required|string|unique:users',
                 'address' => 'required|string',
@@ -42,7 +44,7 @@ class AuthController extends Controller
             ]);
 
             $user->save();
-            $user->roles()->sync([2]);
+            $user->roles()->sync(Role::where('slug', 'client')->first()->id);
             DB::commit();
 
             $oClient = OClient::where('password_client', 1)->first();

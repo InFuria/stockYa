@@ -25,6 +25,7 @@ class UserRequest extends FormRequest
     {
         return [
             'dni' => 'required|numeric',
+            'company_id' => 'numeric',
             'name' => 'required|string',
             'username' => 'required|string',
             'address' => 'string',
