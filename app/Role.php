@@ -18,6 +18,11 @@ class Role extends Model
         'permissions' => 'array',
     ];
 
+    public function setPermissionsAttribute($value)
+    {
+        $this->attributes['permissions'] = json_encode($value);
+    }
+
     public function users()
     {
         return $this->belongsToMany(User::class, 'role_users');

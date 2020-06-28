@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-use Spatie\PdfToImage\Pdf as Pdf;
+//use Spatie\PdfToImage\Pdf as Pdf;
 
 class NAWebSale extends Model
 {
@@ -42,6 +42,9 @@ class NAWebSale extends Model
 
     public static function sendTicketByWhatsapp(NAWebSale $order, $file){
 
+        $url = 'https://eu144.chat-api.com/instance141481/message?token=ukkt3cjnhraf0a70';
+        $link = route('download.ticket', ['tracker' => $order->tracker]);
+
         $phone = $order->phone;
         $phone = str_replace(" ", "", $phone);
         $phone = str_replace("+", "", $phone);
@@ -53,48 +56,23 @@ class NAWebSale extends Model
 
 Si crees que hubo un error o necesitas soporte contactanos a futuroemail@gmail.com.
 
+Para descargar tu comprobante de compra ingresa al siguiente link: {$link}
+
 Muchas gracias por utilizar nuestro servicios!";
 
 
-        $url_message = 'https://eu144.chat-api.com/instance141481/message?token=ukkt3cjnhraf0a70';
-        $url_files = 'https://eu144.chat-api.com/instance141481/sendFile?token=ukkt3cjnhraf0a70';
-
         /** Send message */
-        $json_message = json_encode([
+        $json = json_encode([
             'phone' => $client_phone,
             'body' => $message
         ]);
 
-        $options_message = stream_context_create(['http' => [
+        $options = stream_context_create(['http' => [
             'method'  => 'POST',
             'header'  => 'Content-type: application/json',
-            'content' => $json_message
+            'content' => $json
         ]]);
 
-
-        /** Send ticket file */
-        $filename = File::find($file)->name;
-        $file_dir = storage_path(). '/tickets/' . $filename;
-        $file = base64_encode(file_get_contents($file_dir));
-
-        $pdf = new Pdf('http://stockya.local:92/api/files/' . File::find($file)->id);
-        $pdf->saveImage(storage_path() . '/uploadedimages');
-
-        echo $pdf;
-
-        $json_ticket = json_encode([
-            'phone' => $client_phone,
-            'body' => 'data:image/jpg;base64,' . $file,
-            'filename' => 'ticket_' . $filename
-        ]);
-
-        $options_ticket = stream_context_create(['http' => [
-            'method'  => 'POST',
-            'header'  => 'Content-type: application/json',
-            'content' => $json_ticket
-        ]]);
-
-        //file_get_contents($url_message, false, $options_message);
-        file_get_contents($url_files, false, $options_ticket);
+        file_get_contents($url, false, $options);
     }
 }

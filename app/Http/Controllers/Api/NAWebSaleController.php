@@ -190,13 +190,31 @@ class NAWebSaleController extends Controller
             $filename = "{$order->id}_" . Carbon::now()->format('Y_d_m_H_i_s') . ".pdf";
             $pdf->save(storage_path().'/tickets/' . $filename . '');
 
-            $file = File::insertGetId([
-                'slug' => "ticket+{$filename}",
-                'name' => $filename,
-                'status' => 1,
-                'apply' => 1
-            ]);
-            File::sync([], [$file], $order, 'nawebsale');
+            if ($order->files->toArray() != []){
+                $details = $order->files->first();
+                $path = storage_path() . '/tickets/' . $details->name . '';
+
+                $file = $details;
+                $file->slug = "ticket+{$filename}";
+                $file->name = $filename;
+                $file->status = 1;
+                $file->apply = 1;
+                $file->save();
+
+                if (file_exists($path))
+                    unlink($path);
+
+                $file = $file->id;
+
+            } else {
+                $file = File::insertGetId([
+                    'slug' => "ticket+{$filename}",
+                    'name' => $filename,
+                    'status' => 1,
+                    'apply' => 1
+                ]);
+                File::sync([], [$file], $order, 'nawebsale');
+            }
 
             if (isset($order->email))
                 Mail::to("{$order->email}")->send(new WebSaleConfirmationMail($order, $file));
@@ -214,6 +232,18 @@ class NAWebSaleController extends Controller
             DB::rollBack();
             Log::error('WebSaleController::sendTicket - ' . $e->getMessage());
             return response()->json(['origin' => 'WebSaleController:sendTicket', 'message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function downloadTicket($tracker){
+        try {
+            $order = NAWebSale::where('tracker', $tracker)->first();
+
+            return response()->download(storage_path() . '/tickets/' . $order->name . '');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('NAWebSaleController::downloadTicket - ' . $e->getMessage());
+            return response()->json(['origin' => 'NAWebSaleController:downloadTicket', 'message' => $e->getMessage()], 400);
         }
     }
 }
