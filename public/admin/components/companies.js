@@ -13,10 +13,14 @@ Vue.component("companies", {
                 "city_id":1,"delivery":0,
                 "zone":{},
                 "attention_hours":"-",
-                "category_id":1,"category":""
+                "category_id":1,"category":"",image:[]
             },
             itemNew:{},
-            modNew:false
+            modNew:false,
+            imagesCompany:[],
+            imagesShow:false,
+            alert:'',
+            filter:'Todas'
         }
     },
     computed: {
@@ -26,9 +30,45 @@ Vue.component("companies", {
                 res.push(category.name)
             }
             return res
+        },
+        companiesFilter(){
+            let res = Object.values(this.companies.list)
+            if(this.filter == 'Todas'){
+                return res
+            }
+            return res.filter( item => { return (item.category == this.filter) } )
         }
     },
     methods: {
+
+        companyNormalizeCategory( company ){
+            if(company.id != undefined && !company.hasOwnProperty('updated')){
+                for (let category of this.categories.company) {
+                    if(category.id == company.category_id){
+                        company.category = category.name
+                        return company
+                    }
+                }
+            }else{
+                for (let category of this.categories.company) {
+                    if(category.name == company.category){
+                        company.category_id = category.id
+                        return company
+                    }
+                }
+            }
+        },
+        companyNormalizeImage(company){
+            company.image = company.image.filter( image => Number.isInteger(image) )
+            return company
+        },
+        companyNormalize( company ){
+            console.log(' normalize ' , {company})
+            company = this.companyNormalizeCategory( company )
+            console.log(' normalize post ' , {company})
+            company = this.companyNormalizeImage( company )
+            return company
+        },
         image(image){
             if(Number.isNaN(parseInt(image))){
               return image
@@ -36,13 +76,22 @@ Vue.component("companies", {
             return API.route('file','open',{id:image}).url
         },
         toggle(company) {
+            console.log(this.categories.company)
+            this.imagesShow = false
             if (company == this.edit) {
+                this.itemNew = Object.assign( {} , this.itemDefault)
+                this.imagesCompany = []
                 this.mod = false
                 this.edit = null
             } else {
+                this.imagesCompany = company.image
                 this.mod = true
+                this.edit = null
                 this.edit = company
             }
+            setTimeout( ()=> {
+                this.imagesShow = true
+            }, 500)
         },
         toggleProduct(company) {
             products().getter(company)
@@ -52,7 +101,7 @@ Vue.component("companies", {
                     for(let product of response.data.products.data){
                         products().push(product)
                     }
-                    console.log(products().list)
+                    //console.log(products().list)
                     if (company == this.editProduct) {
                         this.modProduct = false
                         this.editProduct = null
@@ -82,13 +131,26 @@ Vue.component("companies", {
                 console.log( {error} )
             })
         },
+        updateImages(images){
+            if(this.editProduct != null){
+                this.company.image = images
+                this.update( this.company )
+            }else{
+                this.itemNew.image = images
+            }
+        },
         update(company) {
-            this.companies.replace( company )
+            this.alert = ''
+            company.updated = true
+            let companyNew = this.companyNormalize( Object.assign( {} , company ) )
+            this.companies.replace( companyNew )
             .then( res => {
+                delete company.updated
                 console.log({res})
             })
             .catch(error => {
                 console.log({error})
+                this.alert = JSON.stringify(error)
             })
             /*
             let companyNew = Object.assign({}, company)
@@ -105,18 +167,22 @@ Vue.component("companies", {
             */
         },
         create(){
-            this.companies.create(this.itemNew)
+            this.alert = ''
+            console.log('test ', this.itemNew)
+            this.companies.create( this.companyNormalize( Object.assign({} , this.itemNew) ) )
             .then( response => { 
-                this.companies.push(response.data.company)
-                this.edit= null
-                this.mod= false
-                this.itemNew = this.itemDefault
-                this.reView()
+                this.view = false
+                this.companies.push ( this.companyNormalizeCategory(response.data.company) )
+                setTimeout( ()=> {
+                    this.view = true
+                    this.toggle( this.companies[this.companies.length - 1] )
+                },500)
             })
              .catch( error => {
-                 console.log({error}) 
-                 this.itemNew = this.itemDefault
-                 this.reView()
+                 console.log({error})
+                 this.alert = JSON.stringify(error)
+                 //this.itemNew = this.itemDefault
+                 //this.reView()
             })
         }
     },
@@ -126,6 +192,15 @@ Vue.component("companies", {
     },
     template: `
     <v-row class="pa-2" v-if="view">
+        <v-col cols="12" xs="12" sm="12" md="12" lg="12" class="my-3 d-flex">
+        <v-select
+            label="Mostrar por categorias "
+            :items="categoriesCompany"
+            v-model="filter"
+        ></v-select>
+        <v-btn class="ml-3" @click="filter='Todas'">Todas</v-btn>
+        </v-col>
+        <div v-if="alert!=''"><v-btn @click="this.alert=''" class="red white--text mr-5" small>x</v-btn> <span class="pa-1">{{alert}}</span></div>
         <v-col cols="12" xs="6" sm="6" md="3" lg="2" class="mt-3">
             <span
                 @click="modNew=true"
@@ -140,6 +215,7 @@ Vue.component("companies", {
         >
             <v-card
                 class="mx-auto"
+                v-if="company.category == filter || filter == 'Todas'"
             >
                 <v-dialog v-if="editProduct == company" v-model="modProduct" fullscreen hide-overlay transition="dialog-bottom-transition">
                     <v-card>
@@ -238,7 +314,8 @@ Vue.component("companies", {
                                     <v-list-item-title>
                                         <v-text-field
                                             label="Social"
-                                            v-model="itemNew.social"
+                                            v-model="company.social"
+                                            @change="update(company)"
                                         ></v-text-field>
                                     </v-list-item-title>
                                 </v-list-item-content>
@@ -331,7 +408,7 @@ Vue.component("companies", {
                             </div>
 
                             <div class="pa-5 mx-5">
-                                <image-upload @update="update" :images="company"></image-upload>
+                                <image-upload @update="updateImages" :items="imagesCompany"></image-upload>
                             </div>
                         </v-list>
                     </v-card>
@@ -385,6 +462,10 @@ Vue.component("companies", {
                     <v-btn @click="create" class="white blue--text" small fab><v-icon>mdi-check</v-icon></v-btn>
                 </v-toolbar>
                 <v-list two-line>
+                    <div class="pa-5 mx-5">
+                        <image-upload :show="imagesShow" @update="updateImages" :items="imagesCompany"></image-upload>
+                    </div>
+                    <v-divider inset></v-divider>
                     <v-list-item>
                         <v-list-item-icon>
                             <v-icon color="indigo">mdi-pencil</v-icon>
@@ -508,6 +589,24 @@ Vue.component("companies", {
                         </div>
                     </div>
                 </v-list>
+
+                <v-divider inset></v-divider>
+
+                <v-list-item>
+                    <v-list-item-icon>
+                        <v-icon color="indigo">mdi-car</v-icon>
+                    </v-list-item-icon>
+
+                    <v-list-item-content>
+                        <v-list-item-title>
+                            <v-text-field
+                                label="Delivery"
+                                type="number"
+                                v-model="itemNew.delivery"
+                            ></v-text-field>
+                        </v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
                 <v-divider></v-divider>
                 <v-btn @click="create" class="blue white--text ma-5" >Crear <v-icon>mdi-check</v-icon></v-btn>
             </v-card>

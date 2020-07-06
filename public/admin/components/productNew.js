@@ -39,8 +39,7 @@ Vue.component("products", {
     },
     methods: {
         productNormalizeCategory( product ){
-            if(product.id != undefined){
-                console.log('get category')
+            if(product.category_id != undefined){
                 for (let category of this.categories.product) {
                     if(category.id == product.category_id){
                         product.category = category.name
@@ -48,7 +47,6 @@ Vue.component("products", {
                     }
                 }
             }else{
-                console.log('get id')
                 for (let category of this.categories.product) {
                     if(category.name == product.category){
                         product.category_id = category.id
@@ -70,16 +68,14 @@ Vue.component("products", {
             this.edit = false
             if(product != undefined){
                 if(product != null ){
-                    console.log('target edit' , {product})
-                    this.productTarget = this.productNormalizeCategory(product) 
+                    this.productTarget = product 
                     this.imagesProduct = product.image
                     this.edit = true
                 }
             }else{
+                console.log("new")
                 this.edit = false
-                this.productTarget = Object.assign({} , this.itemDefault)
-                delete this.productTarget.slug
-                delete this.productTarget.id
+                this.productTarget = this.itemDefault
                 this.imagesProduct = []
             }
             this.modNew = true
@@ -99,13 +95,15 @@ Vue.component("products", {
         },
         update() {
             if(this.edit == true){
+                console.log('product update for ' , this.productTarget)
                 this.productTarget = this.productNormalize( this.productTarget )
                 this.products.replace( this.productTarget )
                 .then( res => {
+                    console.log('product update response and replace', {res})
                     this.reView()
                 })
                 .catch(error => {
-                    console.log( {error} )
+                    console.log('product update error',{error})
                 })
             }
         },
@@ -119,16 +117,18 @@ Vue.component("products", {
             })
         },
         create(){
-            console.log('post' , this.productTarget)
             this.productTarget = this.productNormalize( this.productTarget )
-            console.log('normalize post' , this.productTarget)
+            console.log('productTarget ',this.productTarget)
             this.products.create( this.productTarget )
             .then( response => { 
+                console.log({response})
                 this.modNew = false
                 this.products.push( response.data.product )
+                this.productTarget = response.data.product
                 this.reView()
                 setTimeout( ()=> {
-                    this.modalToggleProduct()
+                    console.log('editar ' , this.products )
+                    this.modalToggleProduct( this.productTarget )
                 }, 500)
             })
             .catch( error => {
@@ -259,7 +259,7 @@ Vue.component("products", {
                     </v-list-item>
 
                     <v-divider inset></v-divider>
-                    
+
                     <v-list-item>
                         <v-list-item-icon>
                             <v-icon color="indigo">mdi-tag</v-icon>
