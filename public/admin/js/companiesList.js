@@ -22,7 +22,6 @@ class CompaniesList extends APIHelper{
     normalize(company){
         company.company_id = company.company_id == null ? 0 : parseInt(company.company_id)
         company.city_id = parseInt(company.city_id)
-        company.category_id = parseInt(company.category_id)
         company.image = company.image == undefined || !Array.isArray(company.image) ? [] : company.image
         if(company.image.length > 0){
             for (let index = 0; index < company.image.length; index++) {

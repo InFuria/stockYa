@@ -12,6 +12,7 @@ class ProductsList extends APIHelper{
             'image'])
         this.list = {}
         this.company_id = null
+        this.targetByProccess = null 
     }
     normalize(product){
         product["image"] = product["image"] == undefined ? [] : product["image"]
@@ -25,11 +26,9 @@ class ProductsList extends APIHelper{
             }
         }
         product.prince = parseFloat(product.prince).toFixed(2)
-        product.category_id = parseInt(product.category_id)
         product.company_id = parseInt(product.company_id)
         product.status = parseInt(product.status)
         product.type = String(product.type)
-        console.log({product})
         return product
     }
     push(product){
