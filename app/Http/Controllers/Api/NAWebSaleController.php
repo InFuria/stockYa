@@ -33,8 +33,8 @@ class NAWebSaleController extends Controller
             return response()->json(['data' => $sales],200);
 
         } catch (\Exception $e) {
-            Log::error('WebSaleController::getOrders - ' . $e->getMessage());
-            return response()->json(['origin' => 'WebSaleController:getOrders', 'message' => $e->getMessage()], 400);
+            Log::error('NAWebSaleController::getOrders - ' . $e->getMessage());
+            return response()->json(['origin' => 'NAWebSaleController:getOrders', 'message' => $e->getMessage()], 400);
         }
     }
 
@@ -63,7 +63,7 @@ class NAWebSaleController extends Controller
             }
 
             $websale->total = array_sum($websale->web_sale_details->pluck('subtotal')->toArray());
-            $websale->save();
+            $websale->saveOrFail();
 
             $record = new NAWebSaleRecord();
             $record->transaction_id = $websale->id;
@@ -82,61 +82,62 @@ class NAWebSaleController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('WebSaleController::store - ' . $e->getMessage());
-            return response()->json(['origin' => 'WebSaleController::store', 'message' => $e->getMessage()], 400);
+            Log::error('NAWebSaleController::store - ' . $e->getMessage());
+            return response()->json(['origin' => 'NAWebSaleController::store', 'message' => $e->getMessage()], 400);
         }
     }
 
-    public function update(Request $request, NAWebSale $websale){
-        DB::beginTransaction();
+    public function update(Request $request, NAWebSale $order){
         try {
+            DB::beginTransaction();
 
             $request = $request->validate([
                 'client_name' => 'string',
                 'email' => 'string',
                 'phone' => 'string',
                 'company_id' => 'numeric',
+                'delivery' => 'boolean',
                 'tags' => 'string',
                 'text' => 'string'
             ]);
-            $websale->update($request);
+            $order->update($request);
 
-            $websale->web_sale_details()->delete();
             if ($sale_detail = request()->get('details')){
+                $order->web_sale_details()->delete();
                 foreach ($sale_detail as $detail){
                     $price = (Integer) Product::where('id', $detail['product_id'])->first()->price;
 
                     $details = new NAWebSaleDetail();
-                    $details->na_web_sale_id = $websale->id;
+                    $details->na_web_sale_id = $order->id;
                     $details->product_id = $detail['product_id'];
                     $details->quantity = $detail['quantity'];
                     $details->subtotal = (Integer) $detail['quantity'] * $price;
-                    $details->save();
+                    $details->saveOrFail();
                 }
             }
 
-            $websale->total = array_sum($websale->web_sale_details->pluck('subtotal')->toArray());
-            $websale->save();
+            $order->total = array_sum($order->web_sale_details->pluck('subtotal')->toArray());
+            $order->saveOrFail();
 
             $record = new NAWebSaleRecord();
-            $record->transaction_id = $websale->id;
+            $record->transaction_id = $order->id;
             $record->user_id = request()->user()->id; // se registra el usuario que gestiona la actualizacion
             $record->status = 1; // 0 => created, 1 => updated, 2 => deleted
-            $record->save();
+            $record->saveOrFail();
 
             DB::commit();
 
-            $websale->details = $websale->web_sale_details;
+            $order->details = $order->web_sale_details;
 
             return response()->json([
                 'message' => 'El pedido se ha actualizado exitosamente!',
-                'data' => $websale->attributesToArray()
+                'data' => $order->attributesToArray()
             ],200);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('WebSaleController::update - ' . $e->getMessage());
-            return response()->json(['origin' => 'WebSaleController:update', 'message' => $e->getMessage()], 400);
+            Log::error('NAWebSaleController::update - ' . $e->getMessage());
+            return response()->json(['origin' => 'NAWebSaleController:update', 'message' => $e->getMessage()], 400);
         }
     }
 
@@ -149,14 +150,14 @@ class NAWebSaleController extends Controller
                 'data' => $order->attributesToArray()],200);
 
         } catch (\Exception $e) {
-            Log::error('WebSaleController::select - ' . $e->getMessage());
-            return response()->json(['origin' => 'WebSaleController:select', 'message' => $e->getMessage()], 400);
+            Log::error('NAWebSaleController::select - ' . $e->getMessage());
+            return response()->json(['origin' => 'NAWebSaleController:select', 'message' => $e->getMessage()], 400);
         }
     }
 
     public function status(NAWebSale $order){
-        DB::beginTransaction();
         try {
+            DB::beginTransaction();
 
             $order->status = request()->get('status');
             $order->saveOrFail();
@@ -170,8 +171,8 @@ class NAWebSaleController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('WebSaleController::status - ' . $e->getMessage());
-            return response()->json(['origin' => 'WebSaleController:status', 'message' => $e->getMessage()], 400);
+            Log::error('NAWebSaleController::status - ' . $e->getMessage());
+            return response()->json(['origin' => 'NAWebSaleController:status', 'message' => $e->getMessage()], 400);
         }
     }
 
@@ -199,7 +200,7 @@ class NAWebSaleController extends Controller
                 $file->name = $filename;
                 $file->status = 1;
                 $file->apply = 1;
-                $file->save();
+                $file->saveOrFail();
 
                 if (file_exists($path))
                     unlink($path);
@@ -230,8 +231,8 @@ class NAWebSaleController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('WebSaleController::sendTicket - ' . $e->getMessage());
-            return response()->json(['origin' => 'WebSaleController:sendTicket', 'message' => $e->getMessage()], 400);
+            Log::error('NAWebSaleController::sendTicket - ' . $e->getMessage());
+            return response()->json(['origin' => 'NAWebSaleController:sendTicket', 'message' => $e->getMessage()], 400);
         }
     }
 
