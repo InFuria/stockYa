@@ -14,15 +14,15 @@ use Illuminate\Http\Request;
 */
 
 // Ruta de carga de datos provisional xD
-Route::get('products/index', 'Api\ProductController@index');
+//Route::get('products/index', 'Api\ProductController@index');
 
 /** PUBLIC ROUTES */
 Route::get('products', 'Api\ProductController@getProducts');
 Route::get('products/{product}', 'Api\ProductController@select');
 Route::get('companies', 'Api\CompanyController@getCompanies');
 Route::get('companies/{company}', 'Api\CompanyController@select');
-Route::get('categories/company', 'Api\CompanyCategoryController@getCategories');
-Route::get('categories/company/{category}', 'Api\CompanyCategoryController@select');
+Route::get('categories/companies', 'Api\CompanyCategoryController@getCategories');
+Route::get('categories/companies/{category}', 'Api\CompanyCategoryController@select');
 Route::get('categories/products', 'Api\ProductCategoryController@getCategories');
 Route::get('categories/products/{category}', 'Api\ProductCategoryController@select');
 Route::get('tags', 'Api\TagController@getTags');
@@ -41,10 +41,10 @@ Route::post('companies/{company}/visit', 'Api\CompanyController@visits');
         Route::resource('tags', 'Api\TagController')->except(['index', 'create', 'edit', 'show']);
         Route::post('tags/{tag}/status', 'Api\TagController@status');
 
-        Route::post('categories/company', 'Api\CompanyCategoryController@store');
-        Route::put('categories/company/{category}', 'Api\CompanyCategoryController@update');
-        Route::patch('categories/company/{category}', 'Api\CompanyCategoryController@update');
-        Route::delete('categories/company/{category}', 'Api\CompanyCategoryController@destroy');
+        Route::post('categories/companies', 'Api\CompanyCategoryController@store');
+        Route::put('categories/companies/{category}', 'Api\CompanyCategoryController@update');
+        Route::patch('categories/companies/{category}', 'Api\CompanyCategoryController@update');
+        Route::delete('categories/companies/{category}', 'Api\CompanyCategoryController@destroy');
 
         Route::post('categories/products', 'Api\ProductCategoryController@store');
         Route::put('categories/products/{product}', 'Api\ProductCategoryController@update');
@@ -75,14 +75,6 @@ Route::post('companies/{company}/visit', 'Api\CompanyController@visits');
 
     Route::post('products/{product}/setScore', 'Api\ProductController@setScore');
 
-    /** WEB SALES ROUTES **/
-    Route::post('websales','Api\WebSaleController@store');
-    Route::put('websales/{websale}','Api\WebSaleController@update');
-    Route::patch('websales/{websale}','Api\WebSaleController@update');
-    Route::get('websales/getOrders','Api\WebSaleController@getOrders');
-    Route::get('websales/{order}','Api\WebSaleController@select');
-    Route::post('websales/{order}/status','Api\WebSaleController@status');
-
 
 Route::middleware(['auth:api'])->group(function () {
 
@@ -101,11 +93,21 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('roles/{role}/ban','Api\RoleController@ban');
 
 
-    /** NO AUTH WEB SALES ROUTES */
     Route::middleware(['check.access'])->group(function () {
+
+        /** WEB SALES ROUTES */
+        Route::get('websales','Api\WebSaleController@getOrders');
+        Route::post('websales','Api\WebSaleController@store');
+        Route::put('websales/{order}','Api\WebSaleController@update');
+        Route::patch('websales/{order}','Api\WebSaleController@update');
+        Route::get('websales/{order}','Api\WebSaleController@select');
+        Route::post('websales/{order}/status','Api\WebSaleController@status');
+
+
+        /** NO AUTH WEB SALES ROUTES */
         Route::get('nawebsales','Api\NAWebSaleController@getOrders');
-        Route::put('nawebsales/{websale}','Api\NAWebSaleController@update');
-        Route::patch('nawebsales/{websale}','Api\NAWebSaleController@update');
+        Route::put('nawebsales/{order}','Api\NAWebSaleController@update');
+        Route::patch('nawebsales/{order}','Api\NAWebSaleController@update');
         Route::get('nawebsales/{order}','Api\NAWebSaleController@select');
         Route::post('nawebsales/{order}/status','Api\NAWebSaleController@status');
         Route::get('nawebsales/{order}/sendTicket','Api\NAWebSaleController@sendTicket');
