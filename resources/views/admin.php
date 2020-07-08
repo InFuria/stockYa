@@ -1,5 +1,6 @@
 <?php
 	$mode =  strrpos($_SERVER['HTTP_HOST'],'dona') > 0 ? 'prod' : 'dev';
+	$mode = 'prod';
 ?>
 
 <!DOCTYPE html>
@@ -143,6 +144,7 @@
 	<script src="./admin/components/categories.js"></script>
 	<script src="./admin/components/imageUpload.js"></script>
 	<script src="./admin/components/companies.js?d=<?php echo date("h:m:s")?>"></script>
+	<script src="./admin/components/productNew.js?d=<?php echo date("h:m:s")?>"></script>
 	<script src="./admin/components/products.js?d=<?php echo date("h:m:s")?>"></script>
 	<script src="./admin/js/main.js"></script>
 	

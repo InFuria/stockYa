@@ -46,6 +46,10 @@ class Product extends Model
         return $this->files();
     }
 
+    public function web_sale(){
+        return $this->belongsToMany(WebSaleDetail::class);
+    }
+
     public function na_web_sale(){
         return $this->belongsToMany(NAWebSaleDetail::class);
     }

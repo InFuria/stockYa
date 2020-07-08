@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Laravel\Passport\Client as OClient;
+use Laravel\Passport\Token;
 
 class AuthController extends Controller
 {
@@ -71,6 +72,12 @@ class AuthController extends Controller
         try {
             if (Auth::attempt(['username' => request('username'), 'password' => request('password')])) {
                 $user = Auth::user();
+
+                $userTokens = $user->tokens;
+                foreach($userTokens as $token) {
+                    $token->revoke();
+                }
+
                 $oClient = OClient::where('password_client', 1)->first();
 
                 $auth = request()->user()->inRole('admin');
@@ -79,24 +86,23 @@ class AuthController extends Controller
 
                 $response = $this->getToken($oClient, request('username'), request('password'), $type);
 
-                if ($auth && $user->token == null)
+                if ($auth)
                     $user->token = $response['personal_token'];
-
-                if ($auth && $user->token != null)
-                    $response['personal_token'] = $user->token;
 
                 $user->save();
 
                 Auth::login($user);
 
                 // Response para usuarios con token personal
-                if (isset($user->token))
+                if (isset($user->token)) {
+                    $user = $user->makeHidden('token')->toArray();
                     return response()->json([
                         'success' => true,
                         'token_type' => $response["token_type"],
-                        'token' => $user->token,
+                        'token' => $response['personal_token'],
                         'user' => $user
                     ]);
+                }
 
                 // Response para clientes con token temporal
                 return response()->json([
@@ -106,9 +112,10 @@ class AuthController extends Controller
                     'expires_in' => now()->addHours(1)->format('Y-m-d H:i:s'),
                     'user' => $user
                 ]);
-            } else {
-                return response()->json(['error' => 'Error al autenticar los datos de usuario.'], 401);
             }
+
+            return response()->json(['error' => 'Error al autenticar los datos de usuario.'], 401);
+
         } catch (\Exception $e) {
             Log::error('AuthController::login - ' . $e->getMessage());
             return response()->json(['origin' => 'AuthController::login', 'message' => $e->getMessage()], 400);
@@ -127,12 +134,12 @@ class AuthController extends Controller
                     'success' => true,
                     'message' => 'Se ha cerrado sesion correctamente!'
                 ], 200);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Cierre de sesion no disponible.'
-                ], 401);
             }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Cierre de sesion no disponible.'
+            ], 401);
 
         } catch (\Exception $e) {
             Log::error('AuthController::logout - ' . $e->getMessage());

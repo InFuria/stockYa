@@ -48,7 +48,15 @@ class Company extends Model
         return $this->hasMany(User::class);
     }
 
+    public function web_sales(){
+        return $this->hasMany(WebSale::class);
+    }
+
     public function na_web_sales(){
         return $this->hasMany(NAWebSale::class);
+    }
+
+    public function branches(){
+        return $this->hasMany(Company::class, 'company_id');
     }
 }

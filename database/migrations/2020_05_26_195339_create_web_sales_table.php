@@ -21,6 +21,7 @@ class CreateWebSalesTable extends Migration
             $table->foreign('client_id')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedInteger('payment_id');
             $table->foreign('payment_id')->references('id')->on('payment_methods')->onDelete('cascade');
+            $table->boolean('delivery')->default(0);
             $table->integer('status')->default(0);
             $table->double('total', 10,2);
             $table->integer('tracker');
@@ -36,7 +37,7 @@ class CreateWebSalesTable extends Migration
             $table->unsignedBigInteger('product_id');
             $table->foreign('product_id')->references('id')->on('products')->onDelete('cascade');
             $table->integer('quantity');
-            $table->double('total', 10,2);
+            $table->double('subtotal', 10,2);
         });
 
         Schema::create('web_sale_records', function (Blueprint $table) {

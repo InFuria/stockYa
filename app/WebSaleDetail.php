@@ -15,4 +15,8 @@ class WebSaleDetail extends Model
     public function web_sale(){
         return $this->belongsTo(WebSale::class);
     }
+
+    public function detail(){
+        return $this->belongsTo(Product::class, 'product_id');
+    }
 }

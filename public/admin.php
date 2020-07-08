@@ -1,6 +1,5 @@
 <?php
 	$mode =  strrpos($_SERVER['HTTP_HOST'],'dona') > 0 ? 'prod' : 'dev';
-	$mode = 'prod';
 ?>
 
 <!DOCTYPE html>
@@ -26,7 +25,7 @@
 					<!--
 						<v-app-bar-nav-icon></v-app-bar-nav-icon>
 					-->
-			
+
 					<v-toolbar-title>Pedidos Goya</v-toolbar-title>
 
 					<v-spacer></v-spacer>
@@ -46,7 +45,7 @@
 						slider-color="white"
 						>
 						<v-tab  v-if="sections.length == 0">Login</v-tab>
-						<v-tab 
+						<v-tab
 						v-for="item of sections"
 						:key="item">
 							{{ item }}
@@ -144,10 +143,9 @@
 	<script src="./admin/components/categories.js"></script>
 	<script src="./admin/components/imageUpload.js"></script>
 	<script src="./admin/components/companies.js?d=<?php echo date("h:m:s")?>"></script>
-	<script src="./admin/components/productNew.js?d=<?php echo date("h:m:s")?>"></script>
 	<script src="./admin/components/products.js?d=<?php echo date("h:m:s")?>"></script>
 	<script src="./admin/js/main.js"></script>
-	
+
 </body>
 
 </html>
