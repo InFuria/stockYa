@@ -9,7 +9,7 @@ class WebSale extends Model
 {
     protected $table = 'web_sales';
 
-    protected $fillable = ['company_id', 'client_id', 'payment_id', 'delivery', 'status', 'total', 'tracker', 'tags', 'text'];
+    protected $fillable = ['company_id', 'client_id', 'address', 'payment_id', 'delivery', 'status', 'total', 'tracker', 'tags', 'text'];
 
     protected static function boot()
     {

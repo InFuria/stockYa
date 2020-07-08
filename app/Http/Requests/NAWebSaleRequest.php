@@ -27,8 +27,9 @@ class NAWebSaleRequest extends FormRequest
             'client_name' => 'required|string',
             'email' => 'string',
             'phone' => 'string',
-            'company_id' => 'required|numeric',
+            'address' => 'required|string',
             'delivery' => 'boolean',
+            'company_id' => 'required|numeric',
             'tags' => 'string',
             'text' => 'string'
         ];
