@@ -10,7 +10,7 @@ class NAWebSale extends Model
 {
     protected $table = 'na_web_sales';
 
-    protected $fillable = ['client_name', 'email', 'phone', 'company_id', 'delivery', 'status', 'total', 'tracker', 'tags', 'text'];
+    protected $fillable = ['client_name', 'email', 'phone', 'address', 'company_id', 'delivery', 'status', 'total', 'tracker', 'tags', 'text'];
 
     protected static function boot()
     {

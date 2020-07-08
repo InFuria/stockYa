@@ -93,6 +93,8 @@ class WebSaleController extends Controller
             $request = $request->validate([
                 'company_id' => 'integer',
                 'payment_id' => 'integer',
+                'address' => 'string',
+                'delivery' => 'boolean',
                 'client_id' => 'integer',
                 'status' => 'integer',
                 'total' => 'numeric',

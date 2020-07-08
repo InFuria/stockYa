@@ -95,8 +95,9 @@ class NAWebSaleController extends Controller
                 'client_name' => 'string',
                 'email' => 'string',
                 'phone' => 'string',
-                'company_id' => 'numeric',
+                'address' => 'string',
                 'delivery' => 'boolean',
+                'company_id' => 'numeric',
                 'tags' => 'string',
                 'text' => 'string'
             ]);

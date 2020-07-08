@@ -21,6 +21,7 @@ class CreateWebSalesTable extends Migration
             $table->foreign('client_id')->references('id')->on('users')->onDelete('cascade');
             $table->unsignedInteger('payment_id');
             $table->foreign('payment_id')->references('id')->on('payment_methods')->onDelete('cascade');
+            $table->string('address');
             $table->boolean('delivery')->default(0);
             $table->integer('status')->default(0);
             $table->double('total', 10,2);

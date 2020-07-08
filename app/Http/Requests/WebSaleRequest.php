@@ -26,6 +26,7 @@ class WebSaleRequest extends FormRequest
         return [
             'company_id' => 'required|integer',
             'payment_id' => 'required|integer',
+            'address' => 'required|string',
             'delivery' => 'boolean',
             'tags' => 'string',
             'text' => 'string'

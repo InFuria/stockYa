@@ -20,6 +20,7 @@ class CreateNAWebSalesTable extends Migration
             $table->string('phone')->nullable();
             $table->unsignedInteger('company_id');
             $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            $table->string('address');
             $table->boolean('delivery')->default(0);
             $table->integer('status')->default(0);
             $table->double('total', 10,2);
