@@ -40,11 +40,7 @@
                 <table align="center" width="82%" style="width:594px; font:normal normal 0.938em/2.33em TrebuchetMS; color:#333333; letter-spacing:0.2px;">
                     <tbody align="left">
                     <tr>
-                        <td width="39%" style="padding-right:1%"><strong>Pedido No.:</strong></td>
-                        <td width="60%" style="color:#7b7b7b">{{ $order['id'] }}</td>
-                    </tr>
-                    <tr>
-                        <td width="39%" style="padding-right:1%"><strong>Codigo de seguimiento:</strong></td>
+                        <td width="39%" style="padding-right:1%"><strong>Codigo de pedido:</strong></td>
                         <td width="60%" style="color:#7b7b7b">{{ $order['tracker']  }}</td>
                     </tr>
                     <tr>
@@ -52,12 +48,20 @@
                         <td width="60%" style="color:#7b7b7b">{{ $order['client_name'] }}</td>
                     </tr>
                     <tr>
+                        <td width="39%" style="padding-right:1%"><strong>Negocio:</strong></td>
+                        <td width="60%" style="color:#7b7b7b">{{ $order->company->name }}</td>
+                    </tr>
+                    <tr>
                         <td width="39%" style="padding-right:1%"><strong>Email:</strong></td>
-                        <td width="60%" style="color:#7b7b7b">{{ $order['email'] }}</td>
+                        <td width="60%" style="color:#7b7b7b">{{ isset($order['email']) ?: '-' }}</td>
                     </tr>
                     <tr>
                         <td width="39%" style="padding-right:1%"><strong>Teléfono:</strong></td>
                         <td width="60%" style="color:#7b7b7b">{{ isset($order['phone']) ?: '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td width="39%" style="padding-right:1%"><strong>Dirección:</strong></td>
+                        <td width="60%" style="color:#7b7b7b">{{ $order['address'] }}</td>
                     </tr>
                     <tr>
                         <td width="39%" style="padding-right:1%"><strong>Fecha:</strong></td>
@@ -107,7 +111,8 @@
                         </td>
 
                         <td colspan="2" style="color:#807f7f; font-family:TrebuchetMS">
-                            <p style="margin:0px; padding-right:5%"><strong>{{ $order['total'] . ' $'}}</strong></p>
+                            <p style="margin:0px; padding-right:5%">
+                                <strong>{{ array_sum(array_column($products, 'subtotal')) . ' $'}}</strong></p>
                         </td>
                     </tr>
 
@@ -125,7 +130,7 @@
                             <strong>TOTAL:</strong></td>
 
                         <td colspan="2" align="right" style="color:#807f7f; font-family:TrebuchetMS">
-                            <p style="margin:0px; padding-right:5%"><strong>{{ $order['total'] + $delivery . ' $'}}</strong></p></td>
+                            <p style="margin:0px; padding-right:5%"><strong>{{ $order['total'] . ' $'}}</strong></p></td>
                     </tr>
 
                     <tr>
