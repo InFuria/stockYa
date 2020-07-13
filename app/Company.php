@@ -49,11 +49,11 @@ class Company extends Model
     }
 
     public function web_sales(){
-        return $this->hasMany(WebSale::class);
+        return $this->hasMany(WebSale::class)->orderByDesc('id');
     }
 
     public function na_web_sales(){
-        return $this->hasMany(NAWebSale::class);
+        return $this->hasMany(NAWebSale::class)->orderByDesc('id');
     }
 
     public function branches(){

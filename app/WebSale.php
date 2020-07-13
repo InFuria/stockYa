@@ -23,6 +23,11 @@ class WebSale extends Model
         });
     }
 
+    public function scopePendingOrders($query)
+    {
+        return $query->where('status', 0)->orderBy('id','DESC');
+    }
+
     public function user(){
         return $this->belongsTo(User::class);
     }

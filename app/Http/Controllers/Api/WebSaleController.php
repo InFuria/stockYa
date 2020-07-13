@@ -24,7 +24,7 @@ class WebSaleController extends Controller
             if (request()->get('tracker'))
                 return response()->json(['data' => $user->company->web_sales->where('tracker', request()->tracker)->first()]);
 
-            $sales = WebSale::paginate(50);
+            $sales = WebSale::orderByDesc('id')->paginate(50);
 
             return response()->json(['data' => $sales],200);
 

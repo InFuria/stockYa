@@ -4,7 +4,6 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
-//use Spatie\PdfToImage\Pdf as Pdf;
 
 class NAWebSale extends Model
 {
@@ -21,6 +20,11 @@ class NAWebSale extends Model
             $query->tracker = Str::random();
             $query->total = 0;
         });
+    }
+
+    public function scopePendingOrders($query)
+    {
+        return $query->where('status', 0)->orderBy('id','DESC');
     }
 
     public function web_sale_details(){

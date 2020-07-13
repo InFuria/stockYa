@@ -29,7 +29,7 @@ class NAWebSaleController extends Controller
             if (request()->get('tracker'))
                 return response()->json(['data' => $user->company->na_web_sales->where('tracker', request()->tracker)->first()]);
 
-            $sales = NAWebSale::paginate(50);
+            $sales = NAWebSale::orderByDesc('id')->paginate(50);
 
             return response()->json(['data' => $sales],200);
 
@@ -41,14 +41,19 @@ class NAWebSaleController extends Controller
 
     public function pendingOrders(){
         try {
+            if ($company = request()->get('company_id')){
+                $sales = NAWebSale::pendingOrders()->where('company_id', $company)->get();
 
-            $sales = NAWebSale::where('status', 0)->get();
+                return response()->json(['data' => $sales],200);
+            }
+
+            $sales = NAWebSale::pendingOrders()->get();
 
             return response()->json(['data' => $sales],200);
 
         } catch (\Exception $e) {
-            Log::error('NAWebSaleController::getOrders - ' . $e->getMessage());
-            return response()->json(['origin' => 'NAWebSaleController:getOrders', 'message' => $e->getMessage()], 400);
+            Log::error('NAWebSaleController::pendingOrders - ' . $e->getMessage());
+            return response()->json(['origin' => 'NAWebSaleController:pendingOrders', 'message' => $e->getMessage()], 400);
         }
     }
 
