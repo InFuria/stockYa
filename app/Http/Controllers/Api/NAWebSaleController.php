@@ -39,6 +39,19 @@ class NAWebSaleController extends Controller
         }
     }
 
+    public function pendingOrders(){
+        try {
+
+            $sales = NAWebSale::where('status', 0)->get();
+
+            return response()->json(['data' => $sales],200);
+
+        } catch (\Exception $e) {
+            Log::error('NAWebSaleController::getOrders - ' . $e->getMessage());
+            return response()->json(['origin' => 'NAWebSaleController:getOrders', 'message' => $e->getMessage()], 400);
+        }
+    }
+
     public function store(NAWebSaleRequest $request){
         try {
             DB::beginTransaction();
