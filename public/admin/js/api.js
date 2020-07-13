@@ -63,7 +63,7 @@ class API{
             console.log({error});
         })
 
-        API.getter('categories/company')
+        API.getter('categories/companies')
         .then((response)=>{
             let res = Array.sortObject(response.data.data , 'name')
             for( let category of res ){

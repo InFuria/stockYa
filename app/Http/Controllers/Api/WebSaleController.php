@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Company;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\WebSaleRequest;
 use App\Product;
@@ -23,7 +24,7 @@ class WebSaleController extends Controller
             if (request()->get('tracker'))
                 return response()->json(['data' => $user->company->web_sales->where('tracker', request()->tracker)->first()]);
 
-            $sales = WebSale::paginate(50);
+            $sales = WebSale::orderByDesc('id')->paginate(50);
 
             return response()->json(['data' => $sales],200);
 
@@ -57,7 +58,8 @@ class WebSaleController extends Controller
                 $details->saveOrFail();
             }
 
-            $websale->total = array_sum($websale->web_sale_details->pluck('subtotal')->toArray());
+            $delivery_cost = $request->delivery == true ? Company::find($websale->company_id)->delivery : 0 ;
+            $websale->total = array_sum($websale->web_sale_details->pluck('subtotal')->toArray()) + $delivery_cost;
             $websale->saveOrFail();
 
             $record = new WebSaleRecord();
@@ -117,13 +119,14 @@ class WebSaleController extends Controller
                 }
             }
 
-            $order->total = array_sum($order->web_sale_details->pluck('subtotal')->toArray());
+            $delivery_cost = $order->delivery == true ? Company::find($order->company_id)->delivery : 0 ;
+            $order->total = array_sum($order->web_sale_details->pluck('subtotal')->toArray()) + $delivery_cost;
             $order->saveOrFail();
 
             $record = new WebSaleRecord();
             $record->transaction_id = $order->id;
-            $record->user_id = request()->user()->id; // se registra el usuario que gestiona la actualizacion
-            $record->status = 1; // 0 => created, 1 => updated, 2 => deleted
+            $record->user_id = request()->user()->id;
+            $record->status = 2;
             $record->saveOrFail();
 
             DB::commit();

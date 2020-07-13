@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Company;
 use App\File;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\NAWebSaleRequest;
@@ -28,13 +29,31 @@ class NAWebSaleController extends Controller
             if (request()->get('tracker'))
                 return response()->json(['data' => $user->company->na_web_sales->where('tracker', request()->tracker)->first()]);
 
-            $sales = NAWebSale::paginate(50);
+            $sales = NAWebSale::orderByDesc('id')->paginate(50);
 
             return response()->json(['data' => $sales],200);
 
         } catch (\Exception $e) {
             Log::error('NAWebSaleController::getOrders - ' . $e->getMessage());
             return response()->json(['origin' => 'NAWebSaleController:getOrders', 'message' => $e->getMessage()], 400);
+        }
+    }
+
+    public function pendingOrders(){
+        try {
+            if ($company = request()->get('company_id')){
+                $sales = NAWebSale::pendingOrders()->where('company_id', $company)->get();
+
+                return response()->json(['data' => $sales],200);
+            }
+
+            $sales = NAWebSale::pendingOrders()->get();
+
+            return response()->json(['data' => $sales],200);
+
+        } catch (\Exception $e) {
+            Log::error('NAWebSaleController::pendingOrders - ' . $e->getMessage());
+            return response()->json(['origin' => 'NAWebSaleController:pendingOrders', 'message' => $e->getMessage()], 400);
         }
     }
 
@@ -62,13 +81,14 @@ class NAWebSaleController extends Controller
                 $details->saveOrFail();
             }
 
-            $websale->total = array_sum($websale->web_sale_details->pluck('subtotal')->toArray());
+            $delivery_cost = $request->delivery == true ? Company::find($websale->company_id)->delivery : 0 ;
+            $websale->total = array_sum($websale->web_sale_details->pluck('subtotal')->toArray()) + $delivery_cost;
             $websale->saveOrFail();
 
             $record = new NAWebSaleRecord();
             $record->transaction_id = $websale->id;
             $record->user_id = null;
-            $record->status = 0;// 0 => created, 1 => updated, 2 => deleted
+            $record->status = 0;
             $record->saveOrFail();
 
             DB::commit();
@@ -117,13 +137,14 @@ class NAWebSaleController extends Controller
                 }
             }
 
-            $order->total = array_sum($order->web_sale_details->pluck('subtotal')->toArray());
+            $delivery_cost = $order->delivery == true ? Company::find($order->company_id)->delivery : 0 ;
+            $order->total = array_sum($order->web_sale_details->pluck('subtotal')->toArray()) + $delivery_cost;
             $order->saveOrFail();
 
             $record = new NAWebSaleRecord();
             $record->transaction_id = $order->id;
-            $record->user_id = request()->user()->id; // se registra el usuario que gestiona la actualizacion
-            $record->status = 1; // 0 => created, 1 => updated, 2 => deleted
+            $record->user_id = request()->user()->id;
+            $record->status = 2;
             $record->saveOrFail();
 
             DB::commit();
@@ -187,7 +208,8 @@ class NAWebSaleController extends Controller
                 'banner_style' => "height: 50px; padding-bottom: 25px;",
                 'order' => $order,
                 'delivery' => $delivery,
-                'products' => $products]);
+                'products' => $products
+            ]);
 
             $filename = "{$order->id}_" . Carbon::now()->format('Y_d_m_H_i_s') . ".pdf";
             $pdf->save(storage_path().'/tickets/' . $filename . '');

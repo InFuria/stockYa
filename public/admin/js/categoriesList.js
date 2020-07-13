@@ -33,7 +33,7 @@ class CategoriesList extends APIHelper{
             console.log({error});
         })
 
-        this.api('list',{is:'company'})
+        this.api('list',{is:'companies'})
         .then((response)=>{
             let res = Array.sortObject(response.data.data , 'name')
             for( let category of res ){
