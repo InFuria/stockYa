@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Company;
 use App\File;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\NAWebSaleRequest;
@@ -29,8 +28,10 @@ class NAWebSaleController extends Controller
             if (request()->get('tracker'))
                 return response()->json(['data' => $user->company->na_web_sales->where('tracker', request()->tracker)->first()]);
 
-            $sales = NAWebSale::orderByDesc('id')->paginate(50);
-
+            $sales = NAWebSale::paginate(50);
+            foreach($sales as $key => $sale){
+                $sale["products"] = $sale->web_sale_details()->with('detail')->get()->toArray();
+            }
             return response()->json(['data' => $sales],200);
 
         } catch (\Exception $e) {

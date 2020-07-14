@@ -3,7 +3,7 @@
 
 class API{
     static dominio(){
-        return "https://kaizen-donarosa.com/api/"
+        return "https://kaizen-donarosa.com/api/v2/"
     }
     static routes(){
         return {
@@ -37,6 +37,9 @@ class API{
                 create:{method:'post',url:'files'},
                 open:{method:'get',url:'files/<id>'}
             },
+            websale:{
+                create:{method:'post' , url:'nawebsales'}
+            }
 		}
     }
     static route(entity , action , data){
@@ -68,12 +71,17 @@ class API{
         .catch(function (error) {
             console.log({error});
         })
-
-        API.getter('categories/company')
+        
+        API.getter('categories/companies')
         .then((response)=>{
             let res = Array.sortObject(response.data.data , 'name')
             for( let category of res ){
-                categories().company.push(category)
+                if(category.name.toLowerCase().search('test') == -1){
+                    let add = categories().company.filter( item => item.name == category.name )
+                    if(add.length == 0){
+                        categories().company.push(category)
+                    }
+                }
             }
             if(call_back.company != undefined){
                 call_back.company()
@@ -106,6 +114,9 @@ class API{
             headers
         })
     }
+    static loader(txt){
+        dataVue.loadingRequest = txt
+    }
 }
 
 class APIHelper{
@@ -114,6 +125,14 @@ class APIHelper{
         this.valids = valids
         this.nextBtn = true
         this.current_page = 1
+        axios.interceptors.response.use(function (response) {
+            // Do something with response data
+            API.loader(null)
+            return response;
+        }, function (error) {
+            // Do something with response error
+            return Promise.reject({error});
+        });
     }
     valid(item){
         for(let a in item){
@@ -129,6 +148,7 @@ class APIHelper{
         paramsUrl = paramsUrl == undefined ? params : paramsUrl
         let { method , url } = API.route(this.entity , action , paramsUrl)
         delete params.id
+        API.loader('Cargando')
         return axios[method]( url , params)
     }
     next(params){
@@ -143,6 +163,23 @@ class APIHelper{
         return axios[method]( url , paramsUrl)
         .then(response => {
             this.nextBtn = response.next_page_url
+            for(let item of response.data[this.entity]){
+                this.push(item)
+            }
+        }).catch( error => {console.log({error})})
+    }
+    prev(params){
+        this.current_page--
+        let paramsUrl = {page:this.current_page}
+        if(params != undefined){
+            for(let a in params){
+                paramsUrl[a] = params[a]
+            }
+        }
+        let { method , url } = API.route(this.entity , 'listPage' , paramsUrl)
+        return axios[method]( url , paramsUrl)
+        .then(response => {
+            this.prevBtn = response.prev_page_url
             for(let item of response.data[this.entity]){
                 this.push(item)
             }

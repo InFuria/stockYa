@@ -7,23 +7,26 @@ Vue.component('client', {
     }},
     methods:{
         hide() {
-            dataVue.client.proccessCompanyId = null
-            dataVue.show.client = false
+            client().proccessCompanyId = null
+            modal("client", false)
         },
         next(){
+          this.update()
           this.error = false
-          if(client.phone > 0){
-            if(client.phone.length < 10){
+          if( parseInt(this.client.phone) > 0){
+            if(this.client.phone.length < 10){
               this.error = "Numero de telefono no valido"
             }
           }
           if(this.error == false){
-            this.update()
-            if(dataVue.client.proccessCompanyId != null){
-              dataVue.cart.websale()
+            if(client().proccessCompanyId != null){
+              modal("client", false)
+              cart().websale()
+            }else{
+              alert( client().proccessCompanyId )
             }
           }else{
-
+            alert(this.error)
           }
         },
         image(img){
@@ -36,7 +39,6 @@ Vue.component('client', {
         }
     },
     mounted(){
-      console.log("client " ,dataVue.client.details)
       for(let detail in dataVue.client.details){
         this.client[detail] = dataVue.client.details[detail]
       }
@@ -87,7 +89,7 @@ Vue.component('client', {
         <v-card-actions>
           <v-spacer></v-spacer>
           <v-btn color="blue darken-1" text @click="hide">Cerrar</v-btn>
-          <v-btn color="blue darken-1" text @click="next">Continuar</v-btn>
+          <v-btn color="blue darken-1" text @click="next()">Continuar</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

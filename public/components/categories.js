@@ -2,9 +2,9 @@ Vue.component("categories" , {
     data(){ return {
         widthBox:"480px",
         color:color(),
-        sectors:sectors(),
         show:show(),
         search:dataVue.search,
+        sectors:sectors()
     }},
     methods:{
         companyView( v ){
@@ -29,6 +29,9 @@ Vue.component("categories" , {
         if(this.$vuetify.breakpoint.xsOnly){
             this.widthBox="100%"
         }
+        setTimeout( ()=> {
+            console.log(companiesList().list)
+        } , 5000 )
     },
     template:`
     <v-navigation-drawer id="categories" v-model="show.categories" app fixed left temporary clipped :width="widthBox">

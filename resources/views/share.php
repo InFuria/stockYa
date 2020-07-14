@@ -1,6 +1,5 @@
 <?php
 	$mode =  strrpos($_SERVER['HTTP_HOST'],'192') > 0 || strrpos($_SERVER['HTTP_HOST'],'dona') > 0 ? 'prod' : 'dev';
-	$mode = 'prod';
 ?>
 <!DOCTYPE html>
 <html>
@@ -8,7 +7,7 @@
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 	<!-- op graph -->
-	<meta property="og:type" content="<?php echo $type ?>" />
+	<meta property="og:type" content="<?php echo $type_site ?>" />
     <meta property="og:title" content="<?php echo $title ?>" />
     <meta property="og:description" content="<?php echo $description ?>" />
     <meta property="og:image" content="<?php echo $image ?>" />
@@ -43,14 +42,30 @@
 	<div style="padding:1rem;top:0;position:fixed;z-index:100" id="instructions"></div>
 	<div id="app">
 		<v-app id="inspire">
+			<div v-if="loadingRequest != null" class="pa-2 ma-2 d-flex justify-center" :style="mousePosition+'position:fixed;z-index:6;'">
+				<div class="loadingRequest-gif grey white--text d-flex pa-1" style="border-radius:5px;opacity:.75">
+					<v-progress-circular
+						indeterminate
+						color="primary"
+						small
+					></v-progress-circular>
+					<span class="mx-2">{{loadingRequest}}</span>
+				</div>
+			</div>
+
 			<client></client>
-			<v-app-bar app clipped-right :color="color.primary" dark>
+			<v-app-bar app clipped-right :color="color.primary" dark 
+				style="position:relative" rounded="false"
+			>
 				<v-btn icon @click.stop="show.modal('categories', 'true')">
 					<v-icon>mdi-store</v-icon>
 				</v-btn>
 				<v-spacer></v-spacer>
-					<v-img style="max-width:140px;max-height:140px;" src="./assets/img/icon.png?d=<?php echo date("hms")?>"></v-img>
-				<v-spacer></v-spacer>
+					<v-img class="red" 
+					:contain="true"
+					style="max-width:100px;height:100px; border-radius:0 0 50% 50%; padding:0rem;box-shadow:0px 3px 5px #000"
+					src="<?php echo $site ?>assets/img/icon.png?d=<?php echo date("hms")?>"></v-img>
+				<v-spacer src="<?php echo $site ?>assets/img/icon.png?d=<?php echo date("hms")?>"></v-spacer>
 				<v-btn icon @click.stop="show.modal('cart', 'true')">
 					<v-icon>mdi-cart</v-icon>
 				</v-btn>
@@ -68,16 +83,21 @@
 										<!-- add mic append-icon="mic" -->
 										<v-text-field 
 											@focus="showCategories=true" 
+											@blur="showCategories=false" 
 											@keydown.enter="$event.target.blur();showCategories=false" 
-											prepend-inner-icon="search" class="mx-4" flat hide-details label="BUSCAR" v-model="search"></v-text-field>
-										<div v-if="showCategories" style="z-index:2;background-color:rgba(255,255,255,.65);position:absolute;width:80vw;margin-left:10vw;left:0">
-											<div>Categorias productos</div>
-											<v-btn x-small class="ma-1"
-												v-for="(item, i) in categoriesProducts" :key="i"
-												@click="search=item.name"
-											>
-												{{ item.name }}
-											</v-btn>
+											prepend-inner-icon="search" class="mx-4" flat hide-details
+											label="BUSCAR" v-model="search"
+										></v-text-field>
+										<div v-if="showCategories && categoriesProductsFilter.length > 0" class="mx-3 my-1 pa-1 elevation-1">
+											<h3>Categorias productos</h3>
+											<div class="d-flex flex-wrap">
+												<v-chip x-small class="ma-1"
+													v-for="(item, i) in categoriesProductsFilter" :key="i"
+													@click="search=item.name"
+												>
+													{{ item.name }}
+												</v-chip>
+											</div>
 										</div>
 									</v-col>
 									<categories-slider @search="setSearch" class="col" xs="12" sm="12"></categories-slider>
@@ -132,13 +152,22 @@
 														</v-chip-group>
 													</v-col>
 												</v-row>
-												<v-divider class="my-5"></v-divider>
-												<h2 class="white orange--text pa-3">Productos</h2>
 											</v-card-text>
 											<v-card-actions v-if="search.search('ofertas') == 0">
 												<!-- <v-btn text>Ver todas</v-btn> -->
 											</v-card-actions>
-											<gallery v-if="show.gallery" @productview="setProductView"></gallery>
+											<v-divider class="my-5"></v-divider>
+											<h2 class="white orange--text pa-3">Combos</h2>
+											<gallery :productslist="productsList" type="combo" v-if="show.gallery" @productview="setProductView"></gallery>
+
+											<v-divider class="my-5"></v-divider>
+											<h2 class="white orange--text pa-3">Ofertas</h2>
+											<gallery :productslist="productsList" type="oferta" v-if="show.gallery" @productview="setProductView"></gallery>
+											<template v-if="show.company" v-for="category of productsListCategory">
+												<v-divider class="my-5"></v-divider>
+												<h2 class="white orange--text pa-3">{{ category.name.toUpperCase() }}</h2>
+												<gallery :productslist="productsList" type="!combo" :filter="'category_id='+category.id" v-if="show.gallery" @productview="setProductView"></gallery>
+											</template>
 										</v-card>
 									</v-col>
 									<product v-if="show.product" @search="setSearch"></product>
@@ -172,14 +201,14 @@
 			<div v-if="false" @click="show.modal('home','false')" class="v-overlay theme--dark" style="z-index: 6;"><div class="v-overlay__scrim" style="opacity: 0.46; background-color: rgb(33, 33, 33); border-color: rgb(33, 33, 33);"></div><div class="v-overlay__content"></div></div>
 		</v-app>
 	</div>
-
+	
 	<style>
 		#loading {
 			position: fixed;
 			width: 100vw;
 			height: 100vh;
-			background-color: #333;
-			z-index: 1;
+			background-color: #f44336 !important;
+			z-index: 100;
 			display: flex;
 			justify-content: center;
 			align-items: center;
@@ -249,6 +278,7 @@
 			}
 		}
 	</style>
+	
 	<script>
 
 		if ('loading' in HTMLImageElement.prototype || 1 == 1) {
@@ -280,10 +310,9 @@
 		}
 		
 		function serverData(){
-		    return {"search":"<?php echo $search ?>"}
+		    return <?php print_r(json_encode($dataserver) ) ?>
 		}
 	</script>
-	<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
 	<?php if($mode == 'prod'){ echo '
 		<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
 		<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
@@ -293,6 +322,7 @@
 		<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons">
+		<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
 	';}
 	else{ echo '
 		<link href="./assets/css/css.css" rel="stylesheet">
@@ -305,6 +335,7 @@
 
 		<link href="./assets/css/materialdesignicons.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons">
+		<script src="./js/axios.min.js"></script>
 		';
 	} ?>
 

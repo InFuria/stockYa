@@ -13,21 +13,23 @@ use Illuminate\Support\Facades\Log;
 
 class CompanyController extends Controller
 {
-    public function getCompanies(){
+    public function getCompanies()
+    {
         try {
 
-            $companies = Company::with('image:files.id,files.name')->orderByDesc('id');
+            if (is_integer($status = request()->get('status'))) {
 
-            if (is_integer($status = request()->get('status'))){
-                $companies = $companies->where('status', $status);
+                $companies = Company::with('image:files.id,files.name')->where('status', $status)->paginate(15);
             }
 
-            if ($category_id = request()->get('category_id')){
-                $companies = $companies->where('category_id', $category_id)->where('status', 1);
+            if ($category_id = request()->get('category_id')) {
+
+                $companies = Company::with('image:files.id,files.name')->where('category_id', $category_id)
+                    ->where('status', 1)->paginate(15);
             }
 
             // Por defecto se traen las empresas habilitadas
-            $companies = isset($companies) ? $companies->paginate(50) : $companies->where('status', 1)->paginate(50);
+            $companies = isset($companies) ? $companies : Company::with('image:files.id,files.name')->where('status', 1)->paginate(15);
 
             return response()->json($companies, 200);
 
@@ -40,8 +42,7 @@ class CompanyController extends Controller
     public function select(Company $company)
     {
         try {
-
-            $company->image = $company->image->map->only('id', 'name');
+            $company->files = $company->files->map->only('id', 'name');
 
             $category = DB::table('company_categories')->where('id', $company->category_id)->first();
             unset($company->category_id);
@@ -55,19 +56,18 @@ class CompanyController extends Controller
         }
     }
 
-    public function store(CompanyRequest $request){
-        DB::beginTransaction();
+    public function store(CompanyRequest $request)
+    {
         try {
+            DB::beginTransaction();
 
-            $request = $request->all();
-            $request['slug'] = urlencode($request['name']);
+            $company = Company::create($request->all());
 
-            $company = Company::create($request);
+            if (request()->get('files'))
+                File::sync([], request()->get('files'), $company, 'company');
 
-            File::sync([], request()->image, $company, 'company');
             DB::commit();
-
-            $company->image =  Company::find($company->id)->image->map->only('id', 'name');
+            $company->files = Company::find($company->id)->files->map->only('id', 'name');
 
             return response()->json([
                 'message' => 'La compañia ha sido registrada con exito!',
@@ -85,9 +85,9 @@ class CompanyController extends Controller
 
     public function update(Request $request, Company $company){
         try {
-            /*
+            DB::beginTransaction();
+
             $request->validate([
-                'id' => 'integer',
                 'name' => 'string',
                 'address' => 'string',
                 'email' => 'string',
@@ -95,7 +95,7 @@ class CompanyController extends Controller
                 'whatsapp' => 'string',
                 'social' => 'string',
                 'city_id' => 'integer',
-                'image' => 'array',
+                'files' => 'array',
                 'score' => 'integer',
                 'delivery' => 'integer',
                 'zone' => 'string',
@@ -105,20 +105,21 @@ class CompanyController extends Controller
                 'company_id' => 'integer',
                 'visits' => 'integer'
             ]);
-            */
-            $request = $request->all();
-            $request['slug'] = urlencode($request['name']);
 
-            $company->update($request);
+            $company->update($request->all());
 
-            $old_files = $company->image->pluck('id')->toArray();
-            File::sync($old_files, request()->image, $company, 'company');
-            $company->image =  Company::find($company->id)->image->map->only('id', 'name');
+            $old_files = $company->files->pluck('id')->toArray();
+            if (request()->get('files'))
+                File::sync($old_files, request()->get('files'), $company, 'company');
+
+            DB::commit();
+
+            $company->files = Company::find($company->id)->files->map->only('id', 'name');
 
             return response()->json([
                 'message' => 'La compañia se ha actualizado!',
                 'company' => $company->attributesToArray(),
-                'all' => $request
+                'all' => $request->all()
             ], 200);
 
         } catch (QueryException $qe) {

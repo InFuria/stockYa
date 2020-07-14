@@ -31,7 +31,7 @@ class CompanyRequest extends FormRequest
             'whatsapp' => 'string',
             'social' => 'string',
             'city_id' => 'integer',//temporal -> required
-            'image' => 'array',
+            'files' => 'array',
             'score' => 'integer',
             'delivery' => 'integer',
             'zone' => 'string',

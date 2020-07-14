@@ -1,14 +1,23 @@
 var vm, products
 var _private = new WeakMap();
 
+class Entity extends APIHelper{
+    constructor(name , attrValid){
+        super(name , attrValid)
+    }
+    normalize(list){
+        return list
+    }
+    valid(v){
+    	return v
+    }
+}
+
 var dataVue = new Object({
 		token:null,
 		alertAuth:"",
 		defaultCompanyImage:"./public/images/default.jpg",
 		color:{primary:"orange darken-4"},
-		companies:new CompaniesList,
-		products:new ProductsList,
-		categories:new CategoriesList,
 		zones:[
 			{ id: 1, name: "Norte" },
 			{ id: 2, name: "Sur" },
@@ -22,17 +31,11 @@ var dataVue = new Object({
 		],
 		componentLoadingList:[],
 		show:new ShowComponents,
-		tab: null,
-		tabs:0,
-		currentItem: 'tab-Web',
-		sections: [],
-	
+		messages: [],	
 })
 
 for(let key of [
-	"show","companies","categories","color","zones","token",
-	"products"
-	]){
+	"show","color","zones","token"]){
 	eval(`function ${key}(k , v){
 		if(k == undefined){
 			return dataVue.${key}
@@ -65,26 +68,39 @@ function vueLaunch() {
 		computed: { },
 		methods: {
 			authValid(){
-				this.sections = ['Web', 'Comercios']
-				categories().getter( {
-					company(){
-						companies().getterInstance()
-					}
+				API.getter( 'nawebsales' )
+				.then( async res => {
+					this.messages = await res.data.data.data
+					console.log({messages:this.messages})
+				})
+				.then( r => {
+					console.log( {r} )
 				})
 			},
 			auth(){
 				API.getterPost('auth/login', {"username":"ely.admin" , "password":"undertale"})
 				.then( async response => {
-					this.token = await response.data
+					let res = await response.data
+					dataVue.token = res.token_type+' '+res.token
 					this.authValid()
 				}).catch(function (error) {
 					this.alertAuth = "Error de autenticacion"
 					console.log({error});
 				});
+			},
+			confirm(order){
+				API.getter( 'nawebsales/'+order+"/sendTicket" )
+				.then( async res => {
+					let messages = await res.data
+					console.log({messages})
+				})
+				.then( r => {
+					console.log( {r} )
+				})
 			}
 		},
 		mounted(){
-			this.authValid()
+			this.auth()
 		}
 	})
 }

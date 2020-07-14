@@ -26,7 +26,7 @@
 					<!--
 						<v-app-bar-nav-icon></v-app-bar-nav-icon>
 					-->
-			
+
 					<v-toolbar-title>Pedidos Goya</v-toolbar-title>
 
 					<v-spacer></v-spacer>
@@ -46,7 +46,7 @@
 						slider-color="white"
 						>
 						<v-tab  v-if="sections.length == 0">Login</v-tab>
-						<v-tab 
+						<v-tab
 						v-for="item of sections"
 						:key="item">
 							{{ item }}
@@ -80,7 +80,6 @@
 		</v-app>
 	</div>
 
-	<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
 	<?php if($mode == 'prod'){ echo '
 		<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
 		<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
@@ -90,6 +89,7 @@
 		<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons">
+		<script src="https://cdn.jsdelivr.net/npm/axios@0.12.0/dist/axios.min.js"></script>
 	';}
 	else{ echo '
 		<link href="./assets/css/css.css" rel="stylesheet">
@@ -102,6 +102,7 @@
 
 		<link href="./assets/css/materialdesignicons.min.css" rel="stylesheet">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Material+Icons">
+		<script src="./js/axios.min.js"></script>
 		';
 	} ?>
 	<script>
@@ -144,10 +145,9 @@
 	<script src="./admin/components/categories.js"></script>
 	<script src="./admin/components/imageUpload.js"></script>
 	<script src="./admin/components/companies.js?d=<?php echo date("h:m:s")?>"></script>
-	<script src="./admin/components/productNew.js?d=<?php echo date("h:m:s")?>"></script>
 	<script src="./admin/components/products.js?d=<?php echo date("h:m:s")?>"></script>
 	<script src="./admin/js/main.js"></script>
-	
+
 </body>
 
 </html>
