@@ -1,13 +1,44 @@
 Vue.component('gallery',{
+  props:['productslist','type','filter'],
   data(){ return {
       cart:cart(),
       carousel:{},
-      productsList:productsList()
+      colors:{oferta:'red', combo:'green'}
+      //productsList:productsList()
   }},
+  computed:{ 
+    productsList() { 
+      return this.productslist.filter(prod => {
+        if(this.type != undefined){
+          let prodType = prod.type.toLowerCase()
+          let types = this.type.toString().toLowerCase().split(',')
+          for(let type of types){
+            if(type.search('!') == 0){
+              if(prodType == type.replace('!','')){
+                return false
+              }
+            } else if(type.search('%') == 0){
+              return (prodType.search(type.replace('%','') > -1 ) )
+            }else{
+              return (type == 'all' || prodType==type)
+            }
+          }
+        }
+        if(this.filter != undefined){
+          let [ keyName , value ] = this.filter.split('=')
+          return ( prod[keyName].toLowerCase() == value )
+        }
+        return false
+      })
+    }
+    
+  },
   methods:{
+    color(v){ return (this.colors[v.toLowerCase()] != undefined ? this.colors[v.toLowerCase()] : '') },
     zone(v){ return products().zone(v) },
     mark(product){
       cart().productTarget( product )
+      this.cart = cart()
     },
     image(img){
         return API.route('file','open',img).url
@@ -18,7 +49,7 @@ Vue.component('gallery',{
     socials(){ return socials() }
   },
   mount(){
-    this.productsList=productsList()
+    //this.productsList=productsList()
   },
   template:`
   <v-container fluid>
@@ -29,7 +60,7 @@ Vue.component('gallery',{
         xs="6" sm="6" md="4" lg="2"
         class="mb-5"
       >
-        <v-card style="max-width:45vw">
+        <v-card style="max-width:45vw" v-bind:class="[color(product.type)]" >
           <div style="position:absolute;z-index:1;width:100%" 
           xs="6" sm="6" md="4" lg="2" class="col d-flex justify-space-between">
             <v-btn style="background-color:rgba(0,0,0,.5);" icon class="white--text" @click="product.ui.detailsShow=!product.ui.detailsShow">

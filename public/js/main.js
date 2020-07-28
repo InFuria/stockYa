@@ -2,8 +2,11 @@ var vm, products
 var _private = new WeakMap();
 
 var dataVue = new Object({
+		loadingRequest:null,
+		loadingRequestCount:1,
+		mousePosition:"",
 		defaultCompanyImage:"./public/images/default.jpg",
-		color:{primary:"orange darken-4"},
+		color:{primary:"orange darken-4" , primaryContrast:"white"},
 		componentLoadingList:[],
 		show:new ShowComponents,
 		showCategories:false,
@@ -12,9 +15,10 @@ var dataVue = new Object({
 		cart:new CartProducts,
 		productView:{value:null},
 		companyView:{name:"",address:"",score:0,delivery:0},
+		companiesList: new CompaniesList,
 		productsList:[],
 		client:new Client,
-		categories:["","Comidas","Indumentaria","Postres","Regaleria","Herramientas","Recambios"],
+		categories:new Categories,
 		categoriesProducts:[],
 		sectors:[],
 		socials: [
@@ -41,11 +45,14 @@ var dataVue = new Object({
 		target:[],
 		targetDelivery:false,
 		footerViewer:true,
-		galleryItems: [],
-		productosList:[]
+		galleryItems: []
 })
 
-for(let key of ["socials","show","productView","companyView","color","cart","products","productsList","sectors"]){
+let globalAccess = [
+	"show","productView","companyView",
+	"color","sectors","socials","categories",
+	"cart","client","products","productsList","companiesList"]
+for(let key of globalAccess){
 	eval(`function ${key}(k , v){
 		if(k == undefined){
 			return dataVue.${key}
@@ -76,9 +83,41 @@ function vueLaunch() {
 		},
 		data() { return dataVue },
 		watch:{ 
-			search(v){ this.searchProccess(v) },
+			search(v){ 
+				if(v.length > 3){
+					this.searchProccess(v)
+				}
+			},
 		},
-		computed: { },
+		computed: { 
+			mousePositionStyle(){
+				return this.mousePosition
+			},
+			productsListCategory(){
+				let mark = []
+				let res = []
+				for(let prod of this.productsList){
+					if(mark.indexOf(prod.category_id) == -1){
+						mark.push(prod.category_id)
+						for(let category of this.categoriesProducts){
+							if(category.id == prod.category_id){
+								res.push(category)
+							}
+						}
+					}
+				}
+				return res
+			},
+			categoriesProductsFilter(){
+				if(this.search == ""){
+					return []
+				}
+				return this.categoriesProducts.filter( item => {
+					let name =  item.name.toLowerCase()
+					return ( name.search( this.search ) > -1 )
+				})
+			}
+		},
 		methods: {
 			reset(){
 				localStorage.clear()
@@ -101,7 +140,8 @@ function vueLaunch() {
 			async searchProccess(v){
 				this.show.company = false
 				this.show.gallery = false
-				if(v == "ofertas"){					
+				v = v.toLowerCase()
+				if(v == "ofertas"){
 					API.getter('products', {type:"ofertas"})
 					.then((response)=>{
 						this.gallery(response.data.data);
@@ -109,7 +149,7 @@ function vueLaunch() {
 					.catch(function (error) {
 						console.log(error);
 					})
-					this.viewCategories('false')
+					this.showCategories = false
 				}else{
 					if(v.search('vendedor')>-1){
 						products().fromCompany(v)
@@ -120,7 +160,18 @@ function vueLaunch() {
 							for(let product of data.products.data){
 								product["company"] = data.company
 							}
-							this.gallery(data.products.data)
+							let res = []
+							for(let a of data.products.data){
+								if(a.type=="Combo"){
+									res.push(a)
+								}
+							}
+							for(let a of data.products.data){
+								if(res.indexOf(a) == -1){
+									res.push(a)
+								}
+							}
+							this.gallery( res )
 						})
 						.catch(function (error) {
 							console.log(error);
@@ -139,26 +190,6 @@ function vueLaunch() {
 					}
 				}
 			},
-			companies(){
-				API.getter('companies')
-				.then((response)=>{
-					this.productsList=[]
-					let sectors = {}
-					for( let company of response.data.data ){
-						let category = this.categories[company.category_id]
-						if(sectors[category] == undefined){
-							sectors[category] = {name:category,shops:[]}
-						}
-						sectors[category].shops.push(company)
-					}
-					for(let sectorKey in sectors){
-						this.sectors.push(sectors[sectorKey])
-					}
-				})
-				.catch(function (error) {
-					console.log(error);
-				})
-			},
 			gallery(productsList){
 				this.productsList = []
 				for(let product of productsList){
@@ -172,33 +203,35 @@ function vueLaunch() {
 				}
 				this.cart.open(this.productsList)
 				this.show.gallery = true
+				this.showCategories = false
 			},
 			image(img){
-				console.log({img})
 				return API.route('file','open',img).url
 			},
 			viewCategories(v){
-				if(this.categoriesProducts.length == 0){
-					Categories.api('list',{is:'products'})
-					.then( res => {
-						this.categoriesProducts = res.data.data
-						this.showCategories = v
-					})
-				}else{
-					this.showCategories = v
-				}
+				console.log('viewCategories ' , v)
 			}
 		},
+		
 		mounted(){
-			document.getElementById("loading").classList.add("off")
-			this.companies()
-			setTimeout( ()=> {
-				this.search = "ofertas"
-				this.footerViewer = false
-				setTimeout( () => {
-					this.showCategories = false
-				},1000);
-			 }, 1000)
+			window.onload = ()=>{
+				this.categories.getAll( true )
+				document.getElementById("loading").style="display:none"
+				document.getElementById("app").style="display:block"
+				document.getElementById("loading").classList.add("off")
+				setTimeout( ()=> {
+					this.companiesList.renderSectors()
+					this.search = serverData() == null ? "ofertas" : serverData().search
+					this.footerViewer = false
+					setTimeout( () => {
+						this.showCategories = false
+						this.viewCategories()
+					},100);
+				}, 1000)
+				window.onmousemove = (event)=>{
+					this.mousePosition = `left:${event.clientX}px;top:${event.clientY}px;`
+				}
+			}
 		}
 	})
 }

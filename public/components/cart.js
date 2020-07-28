@@ -14,15 +14,21 @@ Vue.component('cart',{
 		}
 	},
 	methods:{
-		websale(companyId){
+		websale(delivery , companyId){
+			console.log({ delivery , companyId })
 			modal("cart", false)
-			if(!dataVue.client.validSale(companyId, this.targetDelivery[companyId]).length > 0){
-				dataVue.client.proccessCompanyId = companyId
-				modal("client", true)
+			let incomplete = client().validSale(companyId, this.targetDelivery[companyId.details.name])
+			client().proccessCompanyId = companyId
+			client().proccessCompanyId.deliveryActive = delivery
+			modal("client", true)
+			if(incomplete.length > 0){
+				//modal("client", true)
 			}else{
-				dataVue.client.proccessCompanyId = null
-				mensaje="pedidosgoya.com/?websale=123857"
-				window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}&phone=54${dataVue.cart.companies[companyId].whatsapp}`);
+				//console.log(' cart ' , send)
+				//cart().websale()
+				//dataVue.client.proccessCompanyId = null
+				//mensaje="pedidosgoya.com/?websale=123857"
+				//window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(mensaje)}&phone=54${dataVue.cart.companies[companyId].whatsapp}`);
 				//console.log("concretar venta ", dataVue.cart.companies[companyId].whatsapp)
 			}
 		},
@@ -73,7 +79,7 @@ Vue.component('cart',{
 					<h3 class="pa-2 white--text font-weight-bold text-center text-uppercase">{{cart.companies[index].details.name}}</h3>
 					<div class="green white--text pa-2">
 						Total: $ {{cart.companies[index].total}} 
-						<v-btn class="ml-3" x-small @click="websale(index)">Pedir</v-btn>
+						<v-btn class="ml-3" x-small @click="websale(targetDelivery[index],cart.companies[index])">Pedir</v-btn>
 					</div>
 					<div class="pa-1 d-flex" v-if="cart.companies[index].details.delivery">
 						<v-icon v-bind:class="[targetDelivery[index] ? 'white--text' : 'red' , 'mb-1']">mdi-truck</v-icon>

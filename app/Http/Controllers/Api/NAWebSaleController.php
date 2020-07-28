@@ -29,8 +29,10 @@ class NAWebSaleController extends Controller
             if (request()->get('tracker'))
                 return response()->json(['data' => $user->company->na_web_sales->where('tracker', request()->tracker)->first()]);
 
-            $sales = NAWebSale::orderByDesc('id')->paginate(50);
-
+            $sales = NAWebSale::paginate(50);
+            foreach($sales as $key => $sale){
+                $sale["products"] = $sale->web_sale_details()->with('detail')->get()->toArray();
+            }
             return response()->json(['data' => $sales],200);
 
         } catch (\Exception $e) {
@@ -39,15 +41,36 @@ class NAWebSaleController extends Controller
         }
     }
 
-    public function pendingOrders(){
+    public function pendingOrders($company_id = null){
         try {
-            if ($company = request()->get('company_id')){
-                $sales = NAWebSale::pendingOrders()->where('company_id', $company)->get();
+            if (isset($company_id)){
+                $sales['company'] = Company::whereId($company_id)->selectRaw("id, phone, whatsapp, name")->first()->toArray();
+                $sales['orders'] = NAWebSale::pendingOrders()->where('company_id', $company_id)->get();
 
                 return response()->json(['data' => $sales],200);
             }
 
-            $sales = NAWebSale::pendingOrders()->get();
+            $sales = NAWebSale::pendingOrders()->with('company')->get();
+
+            return response()->json(['data' => $sales],200);
+
+        } catch (\Exception $e) {
+            Log::error('NAWebSaleController::pendingOrders - ' . $e->getMessage());
+            return response()->json(['origin' => 'NAWebSaleController:pendingOrders', 'message' => $e->getMessage()], 400);
+        }
+    }
+
+    /** Funcion para listar los pedidos que ya fueron confirmados al cliente */
+    public function dispatchedMessages($company_id = null){
+        try {
+            if (isset($company_id)){
+                $sales['company'] = Company::whereId($company_id)->selectRaw("id, phone, whatsapp, name")->first()->toArray();
+                $sales['orders'] = NAWebSale::dispatchedMessages()->where('company_id', $company_id)->get();
+
+                return response()->json(['data' => $sales],200);
+            }
+
+            $sales = NAWebSale::dispatchedMessages()->with('company')->get();
 
             return response()->json(['data' => $sales],200);
 
@@ -181,7 +204,23 @@ class NAWebSaleController extends Controller
         try {
             DB::beginTransaction();
 
-            $order->status = request()->get('status');
+            //pendiente, confirmado, mensaje enviado, cancelado
+            switch (request()->get('status')){
+                case 0:
+                    $order->status = 0;
+                    break;
+                case 1:
+                    $order->status = 1;
+                    break;
+                case 2:
+                    $order->status = 2;
+                    break;
+                case 3:
+                    $order->status = 3;
+                    break;
+                default:
+                    return response()->json(['message' => 'No se ha ingresado un estado valido.']);
+            }
             $order->saveOrFail();
             DB::commit();
 

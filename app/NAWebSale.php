@@ -16,7 +16,7 @@ class NAWebSale extends Model
         parent::boot();
 
         static::creating(function ($query) {
-            $query->status = 0; // 0 => pendiente, 1 => completado, 2 => cancelado, 3 => en revision
+            $query->status = 0; // pendiente, confirmado, avisado, cancelado
             $query->tracker = Str::random();
             $query->total = 0;
         });
@@ -25,6 +25,11 @@ class NAWebSale extends Model
     public function scopePendingOrders($query)
     {
         return $query->where('status', 0)->orderBy('id','DESC');
+    }
+
+    public function scopeDispatchedMessages($query)
+    {
+        return $query->where('status', 2)->orderBy('id','DESC');
     }
 
     public function web_sale_details(){

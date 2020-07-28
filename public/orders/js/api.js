@@ -1,4 +1,15 @@
-
+function headers(){
+    let res = {
+        'responseType': 'json',
+        'responseEncoding': 'utf8',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+    if(token() != null){
+        axios.defaults.headers.common['Authorization'] = token()
+    }
+    return res
+}
 
 
 class API{
@@ -48,57 +59,18 @@ class API{
         res.url = res.url.search('http') == -1 ? API.dominio() + res.url : res.url
         return res
     }
-    static categories( call_back ){
-        API.getter('categories/products')
-        .then((response)=>{
-            let res = Array.sortObject(response.data.data , 'name')
-            for( let category of res ){
-                categories().product.push(category)
-            }
-            if(call_back.products != undefined){
-                call_back.products()
-            }
-        })
-        .catch(function (error) {
-            console.log({error});
-        })
-
-        API.getter('categories/companies')
-        .then((response)=>{
-            let res = Array.sortObject(response.data.data , 'name')
-            for( let category of res ){
-                categories().company.push(category)
-            }
-            if(call_back.company != undefined){
-                call_back.company()
-            }
-        })
-        .catch(function (error) {
-            console.log({error});
-        })
-    }
-    static getter(entity, params , headers){
-        params = params == null ? {} : params  
-        headers = headers == null ? {} : headers  
-        return axios({
-            methods:'get',
+    static getter(entity, params , headersList, method){
+        params = params == undefined || params == null ? {} : params
+        let send = {
+            methods:method || 'get',
             url:API.dominio()+entity,
-            params,
-            responseType: 'json',responseEncoding: 'utf8',
-            headers
-        })
+            headers:headersList || headers(),
+            params
+        }
+        return axios[send.methods](send.url , params , {headers:send.headers})
     }
     static getterPost(entity, params , headers){
-        params = params == null ? {} : params  
-        headers = headers == null ? {} : headers  
-        return axios({
-            method:'POST',
-            url:API.dominio()+entity,
-            params,
-            responseType: 'json',
-            responseEncoding: 'utf8',
-            headers
-        })
+        return API.getter( entity, params , headers , 'post' )
     }
 }
 

@@ -36,9 +36,12 @@ class ShowComponents{
 
 class Client{
     constructor(){
-        this.details = {name:"",phone:0,email:"",address:""}
-        this.details = localStorage.getItem("client") == undefined ? this.details : JSON.parse(localStorage.getItem("client"))
-        this.proccesscompanyId = null
+        this.details = localStorage.getItem("client") == undefined ? {name:"",phone:0,email:"",address:""} : JSON.parse(localStorage.getItem("client"))
+        this.proccessCompanyId = null
+        this.phone = 0
+        this.email = ""
+        this.address = ""
+        this.name = ""
     }
     update( k , v ){
         if( this.details[ k ] != undefined ){
@@ -47,25 +50,25 @@ class Client{
         }
     }
     validSale( companyId , delivery ){
-        console.log("companyId " , companyId)
         let incomplete = []
-        if(name == ""){
+        if(this.details.name == ""){
             incomplete.push("name")
         }
-        let contact = this.phone > 0 ? this.phone : ( this.email != "" ? this.email : null )
+        let contact = this.details.phone > 0 ? this.details.phone : ( this.details.email != "" ? this.details.email : null )
         if(contact == null){
             incomplete.push("contact")
         }
-        if(delivery != undefined && this.address == ""){
+        if(delivery != undefined && this.details.address == ""){
             incomplete.push("address")
         }
-        this.proccesscompanyId = companyId
+        this.proccessCompanyId = companyId
         return incomplete
     }
 }
 
-class CartProducts{
-	constructor(){
+class CartProducts extends APIHelper{
+    constructor(){
+        super('websale', "client_name,phone,email,company_id,details,delivery".split(","))
         this.companies = {}
         this.added = {}
         this.delivery = []
@@ -78,6 +81,8 @@ class CartProducts{
             this.history = true
         }
     }
+    normalize( v ){ return v}
+    valid( v ){ return v}
     open(productsList){
         if(this.history == true){
             for(let company in this.added){
@@ -102,36 +107,62 @@ class CartProducts{
         }
         return productsList
     }
-    websale(company){
-        let delivery = this.delivery.indexOf(company)
+    websale(){
+        let company = client().proccessCompanyId
+        /*
         if(delivery > -1){
-            delete this.companies[company]
-            delete this.added[company]
+            //delete this.companies[company]
+            //delete this.added[company]
         }
+        */
+        console.log(company)
+        let companyId = "company"+company.details.id
+        let send = {
+            client_name:client().details.name,
+            phone:client().details.phone,
+            email:client().details.email,
+            address:client().details.address,
+            company_id:company.details.id,
+            details:[],
+            delivery:company.deliveryActive
+        }
+        for(let product of cart().added[companyId]){
+            send.details.push({product_id:product.id, quantity:product.cant})
+        }
+
+        this.api('create', send)
+        .then( res => {
+            window.open(`https://wa.me/54${res.data.data.phone}?text=PEDIDOSGOYA Codigo de pedido:https://kaizen-donosa.com/api/websales/${res.data.data.tracker}`)
+        })
+        .catch( error => console.log({error}))
+        // client_name , email , phone , company_id , tags , text  
         this.save()
     }
     companyAdd(company){
+        console.log(' add ' , this.added)
         let companyId = "company"+company.id
+        console.log( ' companyAdd ' , {companyId})
         if(this.added[companyId] == undefined){
             this.added[companyId] = []
             this.companies[companyId] = {total:0,details:company}
+            this.companies[companyId].deliveryActive = false
         }
         return companyId
     }
-    companyId(product){
+    companyIdFromProduct(product){
         return "company"+product.company.id
     }
     isTargeted( product ){
         if(Object.keys(this.added).length == 0){
             return false
         }else{
-            if(this.added[this.companyId(product)] == undefined){
+            if(this.added[this.companyIdFromProduct(product)] == undefined){
                 return false
             }
-            if(this.added[this.companyId(product)].length == 0){
+            if(this.added[this.companyIdFromProduct(product)].length == 0){
                 return false
             }
-            for( let productItem of this.added[this.companyId(product)] ){
+            for( let productItem of this.added[this.companyIdFromProduct(product)] ){
                 if(productItem.id == product.id){
                     return true
                 }
@@ -157,37 +188,43 @@ class CartProducts{
         this.save()
     }
     productKey(product){
-        if(this.added[this.companyId(product)] == undefined){
+        if(this.added[this.companyIdFromProduct(product)] == undefined){
             return -1
         }
-        return this.added[this.companyId(product)].indexOf(product)
+        return this.added[this.companyIdFromProduct(product)].indexOf(product)
     }
-    productCant(product , val){
-        if(val == 0){
+    productCant(product , cant){
+        if(cant == 0){
             this.markRender(product)
             this.productRemove(product)
         }else{
-            let prod = this.added[this.companyId(product)][this.productKey(product)]
-            prod.cant = val
-            prod.total = (prod.price * parseFloat(val)).toFixed(2)
-            this.added[this.companyId(product)].splice(this.productKey(product) , 1 , prod)
-            this.companyTotal(prod)
+            let company_key = this.companyIdFromProduct(product)
+            let product_key = this.productKey(product)
+            
+            this.added[company_key][product_key].cant = cant
+            this.added[company_key][product_key].total = (product.price * parseFloat(cant)).toFixed(2)
+            
+            this.companyTotal( this.added[company_key][product_key] )
         }
         this.save()
     }
     companyTotal(product){
-        this.companies[this.companyId(product)].total = 0.0
-        for(let a of this.added[this.companyId(product)]){
-            this.companies[this.companyId(product)].total += parseFloat(a.total)
+        this.companies[this.companyIdFromProduct(product)].total = 0.0
+        for(let a of this.added[this.companyIdFromProduct(product)]){
+            this.companies[this.companyIdFromProduct(product)].total += parseFloat(a.total)
         }
-        this.companies[this.companyId(product)].total = this.companies[this.companyId(product)].total.toFixed(1)
+        let company = this.companies[this.companyIdFromProduct(product)]
+        company.total = this.companies[this.companyIdFromProduct(product)].total.toFixed(1)
+        this.companies[this.companyIdFromProduct(product)] = null
+        this.companies[this.companyIdFromProduct(product)] = company
     }
 	productRemove(product){
-        this.added[this.companyId(product)].splice(this.productKey(product) , 1)
-        if(this.added[this.companyId(product)].length == 0){
-            delete this.added[this.companyId(product)]
+        let company_key = this.companyIdFromProduct(product)
+        this.added[company_key].splice(this.productKey(product) , 1)
+        if(this.added[company_key].length == 0){
+            delete this.added[company_key]
         }else{
-            this.companyTotal(prod)
+            this.companyTotal(product)
         }
         this.save()
 	}
@@ -218,7 +255,34 @@ class Products extends APIHelper{
 }
 
 
-class Categories{
+class Categories extends APIHelper{
+    constructor(){
+        super('categories' , ['id' , 'name'])
+        this.product=[]
+        this.company=[]
+    }
+    normalize(v){
+        return v
+    }
+    valid(v){
+        return v
+    }
+    getAll( v ){
+        if(this.product.length == 0){
+            this.api('list',{is:'products'})
+            .then( res => {
+                res.data.data.forEach( item => this.product.push(item) )
+                this.showCategories = v
+            })
+            this.api('list',{is:'companies'})
+            .then( res => {
+                res.data.data.forEach( item => this.company.push(item) )
+            })
+        }else{
+            this.showCategories = v
+        }
+    }
+    /*
     static api(action, params, paramsUrl){
         params = params == undefined ? {} : params
         paramsUrl = paramsUrl == undefined ? params : paramsUrl
@@ -226,4 +290,73 @@ class Categories{
         delete params.id
         return axios[method]( url , params)
     }
+    */
+}
+
+class CompaniesList extends APIHelper{
+    constructor(){
+        super('company' , ['id' , 'name' , 'company_id'])
+        this.list = []
+    }
+    normalize(v){
+        return v
+    }
+    valid(v){
+        return v
+    }
+    listRequest(){
+        return this.api('list')
+    }
+    renderSectors(){
+        if(this.list.length == 0){
+            this.listRequest().then((response)=>{
+                this.list = response.data.data
+                let sectorsName = []
+                for( let company of response.data.data ){
+                    let category = Object.queryid(`${company.category_id}=name` , dataVue.categories.company)
+                    let key = sectorsName.indexOf(category)
+                    if(key == -1){
+                        sectorsName.push(category)
+                        sectors().push({name:category,shops:[company]})
+                    }else{
+                        sectors()[key].shops.push(company)
+                    }
+                }
+            })
+            .catch( error => {
+                console.log({error});
+                setTimeout( ()=> {
+                    this.renderSectors()
+                }, 5000) 
+            })
+        }
+    }
+}
+
+Object["queryid"] = (query , array) => {
+    let [key , val] = query.split("=")
+    if(Number.isNaN( parseInt(key) )){
+        for(let a of array){
+            if(a[key] == val){
+                return a.id
+            }
+        }
+    }else{
+        for(let a of array){
+            if(a.id == key){
+                return a[val]
+            }
+        }
+    }
+    return null
+}
+
+Array["sortObject"] = (array , key)=>{
+    array.sort(function (o1,o2) {
+        //comparación lexicogŕafica
+        if (o1[key] > o2[key]) { return 1; } 
+        else if (o1[key] < o2[key]) { return -1; } 
+        return 0;
+    })
+    return array
 }
