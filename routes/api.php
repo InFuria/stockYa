@@ -31,6 +31,7 @@ Route::post('nawebsales','Api\NAWebSaleController@store');
 Route::get('nawebsales/{tracker}/download','Api\NAWebSaleController@downloadTicket')->name('download.ticket');
 Route::get('nawebsales/pendingOrders/{company_id?}','Api\NAWebSaleController@pendingOrders');
 Route::get('nawebsales/dispatchedMessages/{company_id?}','Api\NAWebSaleController@dispatchedMessages');
+Route::get('nawebsales/massiveStatus/{status}','Api\NAWebSaleController@massiveStatus');
 
 Route::post('products/{product}/visit', 'Api\ProductController@visits');
 Route::post('companies/{company}/visit', 'Api\CompanyController@visits');

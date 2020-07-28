@@ -309,4 +309,24 @@ class NAWebSaleController extends Controller
             return response()->json(['origin' => 'NAWebSaleController:downloadTicket', 'message' => $e->getMessage()], 400);
         }
     }
+
+    public function massiveStatus($status){
+        try {
+            $new = request()->get('new');
+            $orders = request()->get('ids');
+
+            if ($new < 0 || $new > 4)
+                return response()->json(['message' => 'El estado ingresado para la asignacion no es valido'], 400);
+
+            $order = NAWebSale::where('status', $status)->whereBetween('id', $orders)->update(['status' => $new]);
+
+            return response()->json([
+                'message' => 'El estado de las ordenes ha sido modificado',
+                'count' => $order],200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('NAWebSaleController::massiveStatus - ' . $e->getMessage());
+            return response()->json(['origin' => 'NAWebSaleController:massiveStatus', 'message' => $e->getMessage()], 400);
+        }
+    }
 }
