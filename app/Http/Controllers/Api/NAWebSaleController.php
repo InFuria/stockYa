@@ -312,12 +312,13 @@ class NAWebSaleController extends Controller
 
     public function massiveStatus($status){
         try {
-            $new = request()->get('status');
+            $new = request()->get('new');
+            $orders = request()->get('ids');
 
             if ($new < 0 || $new > 4)
                 return response()->json(['message' => 'El estado ingresado para la asignacion no es valido'], 400);
 
-            $order = NAWebSale::where('status', $status)->update(['status' => $new]);
+            $order = NAWebSale::where('status', $status)->whereBetween('id', $orders)->update(['status' => $new]);
 
             return response()->json([
                 'message' => 'El estado de las ordenes ha sido modificado',
