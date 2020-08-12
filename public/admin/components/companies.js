@@ -4,7 +4,7 @@ Vue.component("companies", {
             companies: companies(),
             categories: categories(),
             edit: null, mod: false,
-            editProduct: null, modProduct: false,
+            editCompany: null, modProduct: false,
             zones: zones(),
             view:true,
             itemDefault:{
@@ -76,7 +76,6 @@ Vue.component("companies", {
             return API.route('file','open',{id:image}).url
         },
         toggle(company) {
-            console.log(this.categories.company)
             this.imagesShow = false
             if (company == this.edit) {
                 this.itemNew = Object.assign( {} , this.itemDefault)
@@ -102,12 +101,12 @@ Vue.component("companies", {
                         products().push(product)
                     }
                     //console.log(products().list)
-                    if (company == this.editProduct) {
+                    if (company == this.editCompany) {
                         this.modProduct = false
-                        this.editProduct = null
+                        this.editCompany = null
                     } else {
                         this.modProduct = true
-                        this.editProduct = company
+                        this.editCompany = company
                     }
                 })
                 .catch(function (error) {
@@ -132,9 +131,9 @@ Vue.component("companies", {
             })
         },
         updateImages(images){
-            if(this.editProduct != null){
-                this.company.image = images
-                this.update( this.company )
+            if(this.edit != null){
+                this.edit.image = images
+                this.update( this.edit )
             }else{
                 this.itemNew.image = images
             }
@@ -217,7 +216,7 @@ Vue.component("companies", {
                 class="mx-auto"
                 v-if="company.category == filter || filter == 'Todas'"
             >
-                <v-dialog v-if="editProduct == company" v-model="modProduct" fullscreen hide-overlay transition="dialog-bottom-transition">
+                <v-dialog v-if="editCompany == company" v-model="modProduct" fullscreen hide-overlay transition="dialog-bottom-transition">
                     <v-card>
                         <v-toolbar dark color="primary">
                             <v-btn icon dark @click="toggleProduct(company)">
